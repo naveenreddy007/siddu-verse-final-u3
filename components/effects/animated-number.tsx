@@ -13,7 +13,7 @@ interface AnimatedNumberProps {
 }
 
 const AnimatedNumber: React.FC<AnimatedNumberProps> = ({ value, duration = 0.8, precision = 0, className }) => {
-  const [currentValue, setCurrentValue] = useState(0)
+  const [currentValue, setCurrentValue] = useState(value)
 
   useEffect(() => {
     const controls = animate(currentValue, value, {
@@ -24,7 +24,7 @@ const AnimatedNumber: React.FC<AnimatedNumberProps> = ({ value, duration = 0.8, 
       },
     })
     return () => controls.stop()
-  }, [value, duration, precision, currentValue]) // Added currentValue to dependencies to restart animation if value changes back to a previous one after being 0 or similar
+  }, [value, duration, precision]) // run only when the target value or timing changes
 
   return (
     <span className={className}>
