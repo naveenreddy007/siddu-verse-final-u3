@@ -1,0 +1,112 @@
+import type { PlayerProfile } from "./types"
+
+export const getMockPlayerData = (id: string): PlayerProfile => {
+  return {
+    id,
+    name: "Player One",
+    fullName: "Player One Fullname",
+    dateOfBirth: "1990-01-01",
+    placeOfBirth: "City, Country",
+    nationality: "Nationality",
+    role: "Batsman",
+    battingStyle: "Right-handed",
+    bowlingStyle: "N/A",
+    teams: [{ id: "teamA", name: "Team Alpha", shortName: "TA", logoUrl: "/placeholder.svg?height=50&width=50" }],
+    teamColors: { primary: "#FF0000", secondary: "#FFFFFF" },
+    biography: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Player One is a talented cricketer.",
+    careerSpan: "2010 - Present",
+    imageUrl: "/placeholder.svg?height=150&width=150",
+    socialMedia: { twitter: "#", instagram: "#", facebook: "#" },
+    statistics: {
+      batting: {
+        matches: 10,
+        innings: 10,
+        runs: 500,
+        average: 50.0,
+        strikeRate: 80.0,
+        highestScore: 150,
+        notOuts: 1,
+        centuries: 1,
+        halfCenturies: 3,
+        fours: 50,
+        sixes: 10,
+        formats: {
+          test: {
+            matches: 2,
+            innings: 4,
+            runs: 100,
+            average: 25.0,
+            strikeRate: 50.0,
+            highestScore: 70,
+            notOuts: 0,
+            centuries: 0,
+            halfCenturies: 1,
+            fours: 10,
+            sixes: 1,
+          },
+          odi: {
+            matches: 8,
+            innings: 6,
+            runs: 400,
+            average: 66.6,
+            strikeRate: 90.0,
+            highestScore: 150,
+            notOuts: 1,
+            centuries: 1,
+            halfCenturies: 2,
+            fours: 40,
+            sixes: 9,
+          },
+        },
+        yearlyStats: [{ year: 2023, runs: 200, average: 50.0, centuries: 0, halfCenturies: 2 }],
+      },
+      bowling: {
+        matches: 0,
+        innings: 0,
+        wickets: 0,
+        average: 0,
+        economy: 0,
+        bestBowling: "N/A",
+        fiveWicketHauls: 0,
+        formats: { test: {}, odi: {} },
+        yearlyStats: [],
+      },
+      fielding: { catches: 5, stumpings: 0, runOuts: 1 },
+    },
+    careerHighlights: {
+      batting: [
+        {
+          title: "Maiden Century",
+          description: "Scored first international century.",
+          date: "2015-05-10",
+          opponent: "Team Bravo",
+          venue: "Stadium One",
+          imageUrl: "/placeholder.svg?height=80&width=120",
+        },
+      ],
+    },
+    matchHistory: [
+      {
+        id: "match1",
+        date: "2024-03-15",
+        format: "ODI",
+        teams: {
+          home: { id: "teamA", name: "Team Alpha", shortName: "TA", logoUrl: "/placeholder-ianw8.png" },
+          away: { id: "teamB", name: "Team Bravo", shortName: "TB", logoUrl: "/team-b-logo.png" },
+        },
+        venue: "Venue Name",
+        result: "Team Alpha won",
+        playerPerformance: { batting: { runs: 75, balls: 80, fours: 5, sixes: 1, strikeRate: 93.75 } },
+      },
+    ],
+    awards: [
+      {
+        title: "Player of the Match",
+        year: "2023",
+        description: "Awarded for outstanding performance.",
+        imageUrl: "/placeholder.svg?height=50&width=50",
+      },
+    ],
+  }
+}
+export const mockPlayerIds = ["player-1", "player-2"]
