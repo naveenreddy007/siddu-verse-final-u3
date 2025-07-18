@@ -1,13 +1,10 @@
 "use client"
 
-import type React from "react" // Added React import for JSX
+import type React from "react"
 import { Suspense, useRef } from "react"
 import dynamic from "next/dynamic"
 import { useScroll, motion, type MotionValue } from "framer-motion"
 import { useTransform } from "framer-motion"
-import { getAgentCategories, getAgentsByCategory } from "@/lib/agent-data"
-import { AgentCard } from "@/components/agent-card"
-import { Badge } from "@/components/ui/badge"
 
 // Skeletons
 import SectionSkeleton from "@/components/skeletons/section-skeleton"
@@ -43,11 +40,11 @@ const ParallaxMotionSection = ({
   children: React.ReactNode
   scrollYProgress: MotionValue<number>
   className?: string
-  inputRange?: [number, number, number, number] | [number, number] // Allow more points for opacity
+  inputRange?: [number, number, number, number] | [number, number]
   outputYRange?: [string, string] | [string, string, string, string]
   outputOpacityRange?: [number, number] | [number, number, number, number]
 }) => {
-  const y = useTransform(scrollYProgress, inputRange as any, outputYRange as any) // Cast as any to simplify overload
+  const y = useTransform(scrollYProgress, inputRange as any, outputYRange as any)
   const opacity = useTransform(scrollYProgress, inputRange as any, outputOpacityRange as any)
   return (
     <motion.section className={className} style={{ y, opacity }}>
@@ -56,7 +53,7 @@ const ParallaxMotionSection = ({
   )
 }
 
-// Dynamically import sections - ensuring the .then(mod => mod.ComponentName) matches a named export
+// Dynamically import sections
 const PersonalizedActivitySlider = dynamic(
   () => import("@/components/homepage/activity-snapshot/personalized-activity-slider"),
   {
@@ -77,7 +74,7 @@ const FeatureMatrixSection = dynamic(() => import("@/components/homepage/feature
 
 const NewReleasesSection = dynamic(() => import("@/components/homepage/new-releases-section"), {
   loading: () => <SectionSkeleton message="Loading New Releases..." />,
-  ssr: false, // Often good for carousels to avoid hydration issues
+  ssr: false,
 })
 
 const GlobalMasterpiecesSection = dynamic(() => import("@/components/homepage/global-masterpieces-section"), {
@@ -101,53 +98,14 @@ const TrendingPulseSection = dynamic(() => import("@/components/homepage/trendin
 })
 
 export default function HomePage() {
-  const pageRef = useRef<HTMLDivElement>(null) // Added type for ref
+  const pageRef = useRef<HTMLDivElement>(null)
   const { scrollYProgress } = useScroll({
-    target: pageRef, // Target the page container for more accurate progress within it
-    offset: ["start start", "end end"], // Track from when top of target hits top of viewport, to when bottom of target hits bottom.
+    target: pageRef,
+    offset: ["start start", "end end"],
   })
 
-  const categories = getAgentCategories()
-
   return (
-    <div
-      ref={pageRef}
-      className="bg-black text-white flex flex-col min-h-screen overflow-x-hidden container mx-auto px-4 py-8"
-    >
-      <header className="text-center mb-12">
-        <h1 className="text-4xl md:text-5xl font-bold font-inter bg-clip-text text-transparent bg-gradient-to-r from-primary-light to-siddu-electric-blue/80 mb-4">
-          AI Agent Scanner
-        </h1>
-        <p className="text-lg text-secondary-subtle max-w-2xl mx-auto font-dm-sans">
-          An explorable directory of autonomous agents powering the next generation of digital organizations. Scan and
-          understand their architecture.
-        </p>
-      </header>
-
-      <div className="space-y-12">
-        {categories.map((category) => {
-          const agents = getAgentsByCategory(category)
-          return (
-            <section key={category}>
-              <h2 className="text-2xl font-bold font-inter text-primary-light mb-6 flex items-center">
-                {category}
-                <Badge
-                  variant="secondary"
-                  className="ml-3 bg-siddu-dark-grey text-siddu-electric-blue border-siddu-electric-blue/50"
-                >
-                  {agents.length} Agents
-                </Badge>
-              </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {agents.map((agent) => (
-                  <AgentCard key={agent.id} agent={agent} />
-                ))}
-              </div>
-            </section>
-          )
-        })}
-      </div>
-
+    <div ref={pageRef} className="bg-black text-white flex flex-col min-h-screen overflow-x-hidden">
       <Suspense
         fallback={<SectionSkeleton message="Loading Personalized Insights..." heightClass="h-auto md:h-[480px]" />}
       >
@@ -160,15 +118,10 @@ export default function HomePage() {
         />
       </Suspense>
 
-      {/* Example of passing scrollYProgress for internal parallax */}
       <CinematicVignetteSection vignettes={[mockVignetteData]} scrollYProgress={scrollYProgress} />
 
-      {/* FeatureMatrixSection can also use scrollYProgress for its root parallax */}
       <FeatureMatrixSection features={sidduFeatures} scrollYProgress={scrollYProgress} />
 
-      {/* Using ParallaxMotionSection for simpler parallax on other sections */}
-      {/* Input ranges for ParallaxMotionSection might need adjustment based on actual page layout and section heights */}
-      {/* These are conceptual ranges for demonstration */}
       <ParallaxMotionSection
         scrollYProgress={scrollYProgress}
         inputRange={[0, 0.3, 0.7, 1]}

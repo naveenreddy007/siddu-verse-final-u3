@@ -1,106 +1,108 @@
 "use client"
 
-import { Card, CardContent } from "@/components/ui/card"
-import { Users, Film, MessageSquare, Flag, TrendingUp, Briefcase, HelpCircleIcon, UserCheck } from "lucide-react"
-import { motion } from "framer-motion"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Users, Film, MessageSquare, TrendingUp, Eye, Star, UserPlus, Activity } from "lucide-react"
+import { AnimatedNumber } from "@/components/effects/animated-number"
 
-const kpis = [
+const kpiData = [
   {
     title: "Total Users",
-    value: "24,521",
-    change: "+12%",
-    trend: "up",
+    value: 24567,
+    change: "+12.5%",
+    changeType: "positive" as const,
     icon: Users,
-    color: "bg-blue-500/10 text-blue-500",
+    description: "Active registered users",
   },
   {
     title: "Movies",
-    value: "8,942",
-    change: "+8%",
-    trend: "up",
+    value: 8934,
+    change: "+3.2%",
+    changeType: "positive" as const,
     icon: Film,
-    color: "bg-purple-500/10 text-purple-500",
+    description: "Total movies in database",
   },
   {
     title: "Reviews",
-    value: "32,674",
-    change: "+24%",
-    trend: "up",
+    value: 45123,
+    change: "+18.7%",
+    changeType: "positive" as const,
     icon: MessageSquare,
-    color: "bg-green-500/10 text-green-500",
+    description: "User reviews submitted",
   },
   {
-    title: "Pending Moderation",
-    value: "43",
-    change: "-5%",
-    trend: "down",
-    icon: Flag,
-    color: "bg-amber-500/10 text-amber-500",
+    title: "Daily Active Users",
+    value: 3456,
+    change: "-2.1%",
+    changeType: "negative" as const,
+    icon: Activity,
+    description: "Users active in last 24h",
   },
   {
-    title: "Active Sessions",
-    value: "1,284",
-    change: "+18%",
-    trend: "up",
+    title: "Page Views",
+    value: 156789,
+    change: "+8.9%",
+    changeType: "positive" as const,
+    icon: Eye,
+    description: "Total page views this month",
+  },
+  {
+    title: "Avg Rating",
+    value: 7.8,
+    change: "+0.3",
+    changeType: "positive" as const,
+    icon: Star,
+    description: "Average movie rating",
+  },
+  {
+    title: "New Signups",
+    value: 234,
+    change: "+15.2%",
+    changeType: "positive" as const,
+    icon: UserPlus,
+    description: "New users this week",
+  },
+  {
+    title: "Engagement Rate",
+    value: 68.5,
+    change: "+4.1%",
+    changeType: "positive" as const,
     icon: TrendingUp,
-    color: "bg-cyan-500/10 text-cyan-500",
-  },
-  {
-    title: "Talent Profiles",
-    value: "1,578",
-    change: "+15%",
-    trend: "up",
-    icon: UserCheck, // Lucide icon for talent/verified users
-    color: "bg-teal-500/10 text-teal-500",
-  },
-  {
-    title: "Industry Professionals",
-    value: "632",
-    change: "+9%",
-    trend: "up",
-    icon: Briefcase, // Lucide icon for professionals/briefcase
-    color: "bg-indigo-500/10 text-indigo-500",
-  },
-  {
-    title: "Active Quizzes",
-    value: "58",
-    change: "+5",
-    trend: "up",
-    icon: HelpCircleIcon, // Lucide icon for quizzes
-    color: "bg-rose-500/10 text-rose-500",
+    description: "User engagement percentage",
   },
 ]
 
 export function DashboardKPIs() {
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-      {kpis.map((kpi, index) => (
-        <motion.div
-          key={kpi.title}
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3, delay: index * 0.05 }}
-        >
-          <Card>
-            <CardContent className="p-4 md:p-6">
-              <div className="flex justify-between items-start">
-                <div className={`p-2 rounded-full ${kpi.color}`}>
-                  <kpi.icon size={20} />
-                </div>
-                <div
-                  className={`text-xs md:text-sm font-medium flex items-center ${kpi.trend === "up" ? "text-green-500" : "text-red-500"}`}
-                >
-                  {kpi.change}
-                  <TrendingUp size={14} className={`ml-1 ${kpi.trend === "down" && "rotate-180"}`} />
-                </div>
-              </div>
-              <div className="mt-2 md:mt-3">
-                <h3 className="text-xl md:text-2xl font-bold">{kpi.value}</h3>
-                <p className="text-xs md:text-sm text-muted-foreground">{kpi.title}</p>
-              </div>
-            </CardContent>
-          </Card>
-        </motion.div>
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+      {kpiData.map((kpi, index) => (
+        <Card key={kpi.title} className="relative overflow-hidden">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">{kpi.title}</CardTitle>
+            <kpi.icon className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              <AnimatedNumber
+                value={kpi.value}
+                duration={1000 + index * 100}
+                decimals={kpi.title === "Avg Rating" || kpi.title === "Engagement Rate" ? 1 : 0}
+              />
+              {kpi.title === "Engagement Rate" && "%"}
+            </div>
+            <div className="flex items-center space-x-2 text-xs text-muted-foreground">
+              <span
+                className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${
+                  kpi.changeType === "positive"
+                    ? "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400"
+                    : "bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400"
+                }`}
+              >
+                {kpi.change}
+              </span>
+              <span>{kpi.description}</span>
+            </div>
+          </CardContent>
+        </Card>
       ))}
     </div>
   )

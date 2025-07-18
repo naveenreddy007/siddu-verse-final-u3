@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect, useCallback, useMemo } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { GridIcon, ListIcon, Search, SlidersHorizontal } from "lucide-react"
 import { Input } from "@/components/ui/input"
@@ -8,11 +8,13 @@ import { Button } from "@/components/ui/button"
 import { TreatCard } from "@/components/visual-treats/treat-card"
 import { FilterSidebar } from "@/components/visual-treats/filter-sidebar"
 import { TreatModal } from "@/components/visual-treats/treat-modal"
+import { AddToCollectionModal } from "@/components/visual-treats/add-to-collection-modal"
 import { VisualTreatsSkeleton } from "@/components/visual-treats/visual-treats-skeleton"
 import { ActiveFiltersDisplay } from "@/components/visual-treats/active-filters-display"
-import type { VisualTreat, FilterState } from "@/components/visual-treats/types"
+import type { VisualTreat, FilterState, Collection } from "@/lib/visual-treats-types"
 import { useToast } from "@/hooks/use-toast"
-import { MOCK_VISUAL_TREATS, MOCK_AVAILABLE_FILTERS } from "@/components/visual-treats/mock-data" // Import mock data
+import { getVisualTreats, getAvailableFilters, mockUserCollections } from "@/lib/visual-treats-data"
+import { FuturisticBackground } from "@/components/visual-treats/futuristic-background"
 
 export default function VisualTreatsPage() {
   const [isLoading, setIsLoading] = useState(true)
@@ -26,6 +28,12 @@ export default function VisualTreatsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const { toast } = useToast()
 
+  const [collections, setCollections] = useState<Collection[]>([])
+  const [collectionModalState, setCollectionModalState] = useState<{
+    isOpen: boolean
+    treat: VisualTreat | null
+  }>({ isOpen: false, treat: null })
+
   const [filters, setFilters] = useState<FilterState>({
     categories: [],
     tags: [],
@@ -35,33 +43,38 @@ export default function VisualTreatsPage() {
     sortBy: "popular",
   })
 
-  // Simulate loading and data fetching
   useEffect(() => {
-    const timer = setTimeout(() => {
-      // Add userLiked and userBookmarked to mock data for interactivity
-      const initialTreats = MOCK_VISUAL_TREATS.map((treat) => ({
-        ...treat,
-        userLiked: Math.random() > 0.7, // Randomly like some
-        userBookmarked: Math.random() > 0.8, // Randomly bookmark some
-      }))
-      setAllTreats(initialTreats)
+    const fetchData = async () => {
+      setIsLoading(true)
+      const treats = await getVisualTreats()
+      setAllTreats(treats)
+      setCollections(mockUserCollections) // Load mock collections
       setIsLoading(false)
-    }, 1500)
-    return () => clearTimeout(timer)
+    }
+    fetchData()
   }, [])
 
-  // Filtering and Sorting Logic
+  const treatCollectionStatus = useMemo(() => {
+    const statusMap = new Map<string, boolean>()
+    const allTreatIdsInCollections = new Set(collections.flatMap((c) => c.treatIds))
+    allTreats.forEach((treat) => {
+      statusMap.set(treat.id, allTreatIdsInCollections.has(treat.id))
+    })
+    return statusMap
+  }, [allTreats, collections])
+
   useEffect(() => {
     let currentTreats = [...allTreats]
 
     if (searchQuery) {
+      const lowercasedQuery = searchQuery.toLowerCase()
       currentTreats = currentTreats.filter(
         (treat) =>
-          treat.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          treat.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          treat.film.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          treat.director.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          treat.tags.some((tag) => tag.toLowerCase().includes(searchQuery.toLowerCase())),
+          treat.title.toLowerCase().includes(lowercasedQuery) ||
+          treat.description.toLowerCase().includes(lowercasedQuery) ||
+          treat.film.toLowerCase().includes(lowercasedQuery) ||
+          treat.director.toLowerCase().includes(lowercasedQuery) ||
+          treat.tags.some((tag) => tag.toLowerCase().includes(lowercasedQuery)),
       )
     }
 
@@ -84,16 +97,15 @@ export default function VisualTreatsPage() {
       })
     }
 
-    // Sorting
     switch (filters.sortBy) {
       case "popular":
         currentTreats.sort((a, b) => b.likes - a.likes)
         break
       case "recent":
-        currentTreats.sort((a, b) => b.year - a.year || b.id.localeCompare(a.id))
+        currentTreats.sort((a, b) => new Date(b.releaseDate).getTime() - new Date(a.releaseDate).getTime())
         break
       case "oldest":
-        currentTreats.sort((a, b) => a.year - b.year || a.id.localeCompare(b.id))
+        currentTreats.sort((a, b) => new Date(a.releaseDate).getTime() - new Date(b.releaseDate).getTime())
         break
       case "title_asc":
         currentTreats.sort((a, b) => a.title.localeCompare(b.title))
@@ -160,40 +172,79 @@ export default function VisualTreatsPage() {
 
   const handleLikeToggle = useCallback(
     (id: string) => {
+      const treatToUpdate = allTreats.find((t) => t.id === id)
+      if (!treatToUpdate) return
+
       setAllTreats((prevAllTreats) =>
         prevAllTreats.map((t) =>
           t.id === id ? { ...t, userLiked: !t.userLiked, likes: t.userLiked ? t.likes - 1 : t.likes + 1 } : t,
         ),
       )
-      if (selectedTreat && selectedTreat.id === id) {
-        setSelectedTreat((prev) =>
-          prev
-            ? { ...prev, userLiked: !prev.userLiked, likes: prev.userLiked ? prev.likes - 1 : prev.likes + 1 }
-            : null,
-        )
-      }
       toast({
-        title: allTreats.find((t) => t.id === id)?.userLiked ? "Unliked!" : "Liked!",
-        description: `You ${allTreats.find((t) => t.id === id)?.userLiked ? "un" : ""}liked "${allTreats.find((t) => t.id === id)?.title}".`,
+        title: treatToUpdate.userLiked ? "Unliked!" : "Liked!",
+        description: `You ${treatToUpdate.userLiked ? "un" : ""}liked "${treatToUpdate.title}".`,
       })
     },
-    [allTreats, selectedTreat, toast],
+    [allTreats, toast],
   )
 
-  const handleBookmarkToggle = useCallback(
-    (id: string) => {
-      setAllTreats((prevAllTreats) =>
-        prevAllTreats.map((t) => (t.id === id ? { ...t, userBookmarked: !t.userBookmarked } : t)),
-      )
-      if (selectedTreat && selectedTreat.id === id) {
-        setSelectedTreat((prev) => (prev ? { ...prev, userBookmarked: !prev.userBookmarked } : null))
+  const handleOpenCollectionModal = useCallback((treat: VisualTreat) => {
+    setCollectionModalState({ isOpen: true, treat })
+  }, [])
+
+  const handleCloseCollectionModal = useCallback(() => {
+    setCollectionModalState({ isOpen: false, treat: null })
+  }, [])
+
+  const handleSaveToCollections = useCallback(
+    ({
+      treatId,
+      selectedCollectionIds,
+      newCollectionName,
+    }: {
+      treatId: string
+      selectedCollectionIds: string[]
+      newCollectionName?: string
+    }) => {
+      let newCollections = [...collections]
+      let createdCollection = false
+
+      if (newCollectionName && newCollectionName.trim() !== "") {
+        const newCollection: Collection = {
+          id: `coll-${Date.now()}`,
+          name: newCollectionName.trim(),
+          treatIds: [treatId],
+        }
+        newCollections.push(newCollection)
+        // Ensure the new collection is also marked as selected
+        if (!selectedCollectionIds.includes(newCollection.id)) {
+          selectedCollectionIds.push(newCollection.id)
+        }
+        createdCollection = true
       }
+
+      newCollections = newCollections.map((collection) => {
+        const isSelected = selectedCollectionIds.includes(collection.id)
+        const hasTreat = collection.treatIds.includes(treatId)
+
+        if (isSelected && !hasTreat) {
+          return { ...collection, treatIds: [...collection.treatIds, treatId] }
+        }
+        if (!isSelected && hasTreat) {
+          return { ...collection, treatIds: collection.treatIds.filter((id) => id !== treatId) }
+        }
+        return collection
+      })
+
+      setCollections(newCollections)
       toast({
-        title: allTreats.find((t) => t.id === id)?.userBookmarked ? "Removed from Collection!" : "Added to Collection!",
-        description: `"${allTreats.find((t) => t.id === id)?.title}" ${allTreats.find((t) => t.id === id)?.userBookmarked ? "removed from" : "added to"} your collection (mock).`,
+        title: "Collections Updated",
+        description: `Saved to ${selectedCollectionIds.length} collection${
+          selectedCollectionIds.length === 1 ? "" : "s"
+        }${createdCollection ? " and created a new one." : "."}`,
       })
     },
-    [allTreats, selectedTreat, toast],
+    [collections, toast],
   )
 
   const handleRemoveFilter = useCallback((filterType: keyof Omit<FilterState, "sortBy">, value: string) => {
@@ -233,20 +284,21 @@ export default function VisualTreatsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#1A1A1A] pb-20 text-white">
-      <div className="container mx-auto px-4 py-8">
+    <div className="text-white">
+      <FuturisticBackground />
+      <div className="container mx-auto px-4 py-8 relative z-10">
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="mb-8"
+          className="mb-8 text-center"
         >
-          <h1 className="text-4xl md:text-5xl font-bold mb-3 bg-gradient-to-r from-[#00BFFF] to-[#FFD700] text-transparent bg-clip-text">
-            Visual Treats Gallery
+          <h1 className="text-4xl md:text-6xl font-bold mb-3 bg-gradient-to-r from-[#00BFFF] via-purple-400 to-[#FFD700] text-transparent bg-clip-text tracking-tighter">
+            Cinematic Archive
           </h1>
-          <p className="text-gray-400 text-lg">
-            Explore breathtaking cinematography, iconic compositions, and masterful visual storytelling from the world
-            of cinema.
+          <p className="text-gray-400 text-lg max-w-3xl mx-auto">
+            An evolving gallery of iconic cinematography. Explore breathtaking compositions and masterful visual
+            storytelling from the world of cinema.
           </p>
         </motion.div>
 
@@ -254,24 +306,24 @@ export default function VisualTreatsPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.1 }}
-          className="mb-6 p-4 bg-[#222222]/50 rounded-xl border border-gray-700 shadow-xl"
+          className="mb-6 p-4 bg-black/30 backdrop-blur-sm rounded-xl border border-gray-800 shadow-2xl shadow-black/20"
         >
           <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
             <div className="relative flex-1 w-full md:max-w-md">
-              <Search className="absolute left-3.5 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+              <Search className="absolute left-3.5 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-500" />
               <Input
                 type="text"
                 placeholder="Search by title, film, director, tags..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-11 h-11 bg-[#282828] border-gray-600 focus:border-[#00BFFF] focus:ring-[#00BFFF] text-white rounded-md"
+                className="pl-11 h-11 bg-[#181818] border-gray-700 focus:border-[#00BFFF] focus:ring-[#00BFFF] text-white rounded-md"
               />
             </div>
             <div className="flex items-center gap-2 w-full md:w-auto">
               <Button
                 variant="outline"
                 onClick={() => setViewMode(viewMode === "grid" ? "list" : "grid")}
-                className="h-11 flex-1 md:flex-none border-gray-600 text-gray-300 hover:bg-[#3A3A3A] hover:text-white rounded-md"
+                className="h-11 flex-1 md:flex-none border-gray-700 bg-[#181818] text-gray-300 hover:bg-[#282828] hover:text-white rounded-md"
                 aria-label={viewMode === "grid" ? "Switch to list view" : "Switch to grid view"}
               >
                 {viewMode === "grid" ? <ListIcon className="h-5 w-5" /> : <GridIcon className="h-5 w-5" />}
@@ -279,7 +331,7 @@ export default function VisualTreatsPage() {
               <Button
                 variant="outline"
                 onClick={() => setIsFilterOpen(true)}
-                className="h-11 flex-1 md:flex-none border-gray-600 text-gray-300 hover:bg-[#3A3A3A] hover:text-white rounded-md"
+                className="h-11 flex-1 md:flex-none border-gray-700 bg-[#181818] text-gray-300 hover:bg-[#282828] hover:text-white rounded-md"
               >
                 <SlidersHorizontal className="h-5 w-5 mr-2" />
                 Filters & Sort
@@ -304,14 +356,14 @@ export default function VisualTreatsPage() {
 
         <AnimatePresence mode="wait">
           <motion.div
-            key={viewMode} // This key change triggers enter/exit animations
+            key={viewMode}
             variants={containerVariants}
             initial="hidden"
             animate="visible"
             exit="hidden"
             className={
               viewMode === "grid"
-                ? "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5"
+                ? "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6"
                 : "space-y-4 max-w-4xl mx-auto"
             }
           >
@@ -321,7 +373,8 @@ export default function VisualTreatsPage() {
                   treat={treat}
                   onOpenModal={handleOpenModal}
                   onLikeToggle={handleLikeToggle}
-                  onBookmarkToggle={handleBookmarkToggle}
+                  onCollectionAction={handleOpenCollectionModal}
+                  isInCollection={treatCollectionStatus.get(treat.id) || false}
                   viewMode={viewMode}
                 />
               </motion.div>
@@ -336,15 +389,15 @@ export default function VisualTreatsPage() {
             transition={{ duration: 0.5 }}
             className="text-center py-16"
           >
-            <Search className="h-16 w-16 mx-auto mb-6 text-gray-600" />
-            <h3 className="text-2xl font-semibold text-white mb-3">No Visual Treats Found</h3>
+            <Search className="h-16 w-16 mx-auto mb-6 text-gray-700" />
+            <h3 className="text-2xl font-semibold text-white mb-3">No Results Found</h3>
             <p className="text-gray-400 mb-6">
-              Try adjusting your search or filters, or clear them to see all available treats.
+              Your query returned no visual treats. Try adjusting your search or filters.
             </p>
             <Button
               variant="outline"
               onClick={handleClearAllFilters}
-              className="border-[#00BFFF] text-[#00BFFF] hover:bg-[#00BFFF]/10 hover:text-[#00BFFF]"
+              className="border-[#00BFFF] text-[#00BFFF] hover:bg-[#00BFFF]/10 hover:text-[#00BFFF] bg-transparent"
             >
               Clear All Filters & Search
             </Button>
@@ -357,7 +410,7 @@ export default function VisualTreatsPage() {
         onClose={() => setIsFilterOpen(false)}
         filters={filters}
         onFilterChange={setFilters}
-        availableFilters={MOCK_AVAILABLE_FILTERS}
+        availableFilters={getAvailableFilters(allTreats)}
       />
 
       <TreatModal
@@ -365,7 +418,8 @@ export default function VisualTreatsPage() {
         isOpen={isModalOpen}
         onClose={handleCloseModal}
         onLikeToggle={handleLikeToggle}
-        onBookmarkToggle={handleBookmarkToggle}
+        onCollectionAction={handleOpenCollectionModal}
+        isInCollection={selectedTreat ? treatCollectionStatus.get(selectedTreat.id) || false : false}
         onNavigate={handleNavigateModal}
         relatedTreats={
           selectedTreat
@@ -378,6 +432,14 @@ export default function VisualTreatsPage() {
                 .slice(0, 5)
             : []
         }
+      />
+
+      <AddToCollectionModal
+        isOpen={collectionModalState.isOpen}
+        onClose={handleCloseCollectionModal}
+        treat={collectionModalState.treat}
+        collections={collections}
+        onSave={handleSaveToCollections}
       />
     </div>
   )

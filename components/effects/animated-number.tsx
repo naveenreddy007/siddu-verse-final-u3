@@ -1,36 +1,46 @@
 "use client"
 
-import type React from "react"
-
 import { useEffect, useState } from "react"
-import { animate } from "framer-motion"
 
 interface AnimatedNumberProps {
   value: number
   duration?: number
-  precision?: number
+  decimals?: number
   className?: string
 }
 
-const AnimatedNumber: React.FC<AnimatedNumberProps> = ({ value, duration = 0.8, precision = 0, className }) => {
-  const [currentValue, setCurrentValue] = useState(value)
+export function AnimatedNumber({ value, duration = 1000, decimals = 0, className = "" }: AnimatedNumberProps) {
+  const [displayValue, setDisplayValue] = useState(0)
 
   useEffect(() => {
-    const controls = animate(currentValue, value, {
-      duration: duration,
-      ease: "easeOut",
-      onUpdate: (latest) => {
-        setCurrentValue(Number.parseFloat(latest.toFixed(precision)))
-      },
-    })
-    return () => controls.stop()
-  }, [value, duration, precision]) // run only when the target value or timing changes
+    let startTime: number
+    let animationFrame: number
 
-  return (
-    <span className={className}>
-      {currentValue.toLocaleString(undefined, { minimumFractionDigits: precision, maximumFractionDigits: precision })}
-    </span>
-  )
+    const animate = (currentTime: number) => {
+      if (!startTime) startTime = currentTime
+      const progress = Math.min((currentTime - startTime) / duration, 1)
+
+      // Easing function for smooth animation
+      const easeOutQuart = 1 - Math.pow(1 - progress, 4)
+      const currentValue = value * easeOutQuart
+
+      setDisplayValue(currentValue)
+
+      if (progress < 1) {
+        animationFrame = requestAnimationFrame(animate)
+      }
+    }
+
+    animationFrame = requestAnimationFrame(animate)
+
+    return () => {
+      if (animationFrame) {
+        cancelAnimationFrame(animationFrame)
+      }
+    }
+  }, [value, duration])
+
+  return <span className={className}>{displayValue.toFixed(decimals)}</span>
 }
 
 export default AnimatedNumber

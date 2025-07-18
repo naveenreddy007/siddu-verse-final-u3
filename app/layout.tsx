@@ -1,43 +1,50 @@
 import type React from "react"
-import type { Metadata, Viewport } from "next"
+import type { Metadata } from "next"
 import { Inter, DM_Sans } from "next/font/google"
 import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
 import { Toaster } from "@/components/ui/toaster"
-import { TopNavigation } from "@/components/navigation/top-navigation"
-import { BottomNavigation } from "@/components/navigation/bottom-navigation"
+import InstallPrompt from "@/components/pwa/install-prompt"
 import OfflineBanner from "@/components/pwa/offline-banner"
 import UpdateNotification from "@/components/pwa/update-notification"
-import InstallPrompt from "@/components/pwa/install-prompt"
-// import { MotionLazyContainer } from "@/components/animate/motion-lazy-container" // Optional
+import { NavigationContainer } from "@/components/navigation/navigation-container"
 
 const inter = Inter({
   subsets: ["latin"],
   variable: "--font-inter",
-  display: "swap",
 })
 
 const dmSans = DM_Sans({
   subsets: ["latin"],
   variable: "--font-dm-sans",
-  weight: ["400", "500", "700"],
-  display: "swap",
 })
 
 export const metadata: Metadata = {
-  title: "Siddu Global Entertainment Hub",
-  description:
-    "The definitive digital destination for cinematic masterpieces, visual treats, and real-time cricket updates.",
+  title: "Siddu - Movies & Cricket Platform",
+  description: "Your ultimate destination for movies and cricket content, reviews, and community discussions.",
   manifest: "/manifest.json",
-  icons: {
-    apple: "/icons/apple-touch-icon.png",
-    icon: "/favicon.ico",
+  themeColor: "#1A1A1A",
+  viewport: "width=device-width, initial-scale=1, maximum-scale=1",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Siddu",
   },
-  generator: "v0.dev",
-}
-
-export const viewport: Viewport = {
-  themeColor: "#0A0A0A", // Matches dark theme background
+  formatDetection: {
+    telephone: false,
+  },
+  openGraph: {
+    title: "Siddu - Movies & Cricket Platform",
+    description: "Your ultimate destination for movies and cricket content, reviews, and community discussions.",
+    type: "website",
+    locale: "en_US",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Siddu - Movies & Cricket Platform",
+    description: "Your ultimate destination for movies and cricket content, reviews, and community discussions.",
+  },
+    generator: 'v0.dev'
 }
 
 export default function RootLayout({
@@ -46,24 +53,15 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" className={`${inter.variable} ${dmSans.variable} font-sans`} suppressHydrationWarning>
-      <body>
+    <html lang="en" suppressHydrationWarning>
+      <body className={`${inter.variable} ${dmSans.variable} font-sans antialiased bg-background text-foreground`}>
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
-          {/* <MotionLazyContainer> */}
-          <TopNavigation />
-          {/* Adjust pt-16 if TopNavigation height changes from 4rem/64px */}
-          {/* Adjust pb-16 if BottomNavigation height changes from 4rem/64px or if it's not mobile-only */}
-          <main className="pt-16 pb-16 md:pb-4 bg-background text-foreground min-h-[calc(100vh-4rem)] md:min-h-[calc(100vh-4rem)]">
-            {/* md:pb-4 is a small padding for desktop if bottom nav is mobile only */}
-            {children}
-          </main>
-          <BottomNavigation />
-          <Toaster />
-          {/* PWA components */}
+          <NavigationContainer />
+          <main className="pt-16 sm:pt-20 pb-24 sm:pb-0">{children}</main>
           <OfflineBanner />
           <UpdateNotification />
           <InstallPrompt />
-          {/* </MotionLazyContainer> */}
+          <Toaster />
         </ThemeProvider>
       </body>
     </html>

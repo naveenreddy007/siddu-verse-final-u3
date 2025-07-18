@@ -1,26 +1,29 @@
 {
-  "name": "Siddu AI Agent Scanner",
-  "short_name": "AI Scanner",
-  "description": "Scan and read specifications for autonomous AI agents.",
+  "name": "Siddu - Movies & Cricket Platform",
+  "short_name": "Siddu",
+  "description": "Your ultimate destination for movies and cricket content, reviews, and community discussions.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#1A1A1A",
-  "theme_color": "#00BFFF",
+  "theme_color": "#1A1A1A",
+  "orientation": "portrait-primary",
   "icons": [
     {
       "src": "/icons/icon-192x192.png",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "maskable any"
     },
     {
       "src": "/icons/icon-512x512.png",
       "sizes": "512x512",
-      "type": "image/png"
-    },
-    {
-      "src": "/icons/apple-touch-icon.png",
-      "sizes": "180x180",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "maskable any"
     }
-  ]
+  ],
+  "categories": ["entertainment", "sports", "lifestyle"],
+  "lang": "en",
+  "dir": "ltr",
+  "scope": "/",
+  "prefer_related_applications": false
 }

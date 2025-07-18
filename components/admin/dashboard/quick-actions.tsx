@@ -2,135 +2,83 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { ScrollArea } from "@/components/ui/scroll-area"
-import { motion } from "framer-motion"
-import {
-  UserPlus,
-  FilePlus,
-  ShieldAlert,
-  Settings,
-  UserCheck,
-  Briefcase,
-  HelpCircle,
-  BarChart3,
-  Zap,
-  FileText,
-  Tv,
-} from "lucide-react"
+import { Plus, Users, BarChart3, Shield, Upload, UserCheck } from "lucide-react"
 import Link from "next/link"
 
-const actions = [
+const quickActions = [
   {
-    title: "Add New User",
-    description: "Create a new user account",
-    icon: UserPlus,
-    href: "/admin/users/new", // Assuming a route for new user creation
+    title: "Add Movie",
+    description: "Add new movie to database",
+    icon: Plus,
+    href: "/admin/movies/create",
     color: "text-blue-500",
+    bgColor: "bg-blue-100 dark:bg-blue-900/20",
   },
   {
-    title: "Add New Movie",
-    description: "Add a movie to the database",
-    icon: FilePlus,
-    href: "/admin/movies/new", // Assuming a route for new movie creation
-    color: "text-purple-500",
-  },
-  {
-    title: "Moderate Content",
-    description: "Review flagged content",
-    icon: ShieldAlert,
-    href: "/admin/moderation",
-    color: "text-amber-500",
-  },
-  {
-    title: "Verify Talent Profile",
-    description: "Review talent verifications",
-    icon: UserCheck,
-    href: "/admin/talent-hub/verification",
-    color: "text-teal-500",
-  },
-  {
-    title: "Verify Industry Profile",
-    description: "Review industry verifications",
-    icon: Briefcase,
-    href: "/admin/industry/verification",
-    color: "text-indigo-500",
-  },
-  {
-    title: "Create New Quiz",
-    description: "Add a movie knowledge quiz",
-    icon: HelpCircle,
-    href: "/admin/quizzes/create",
-    color: "text-rose-500",
-  },
-  {
-    title: "Manage Platform Content",
-    description: "Update homepage, lists, etc.",
-    icon: FileText,
-    href: "/admin/content",
+    title: "User Management",
+    description: "Manage user accounts",
+    icon: Users,
+    href: "/admin/users",
     color: "text-green-500",
+    bgColor: "bg-green-100 dark:bg-green-900/20",
   },
   {
-    title: "View Analytics",
-    description: "Access reports & dashboards",
+    title: "Content Moderation",
+    description: "Review flagged content",
+    icon: Shield,
+    href: "/admin/moderation",
+    color: "text-red-500",
+    bgColor: "bg-red-100 dark:bg-red-900/20",
+  },
+  {
+    title: "Analytics",
+    description: "View detailed analytics",
     icon: BarChart3,
     href: "/admin/analytics",
-    color: "text-sky-500",
+    color: "text-purple-500",
+    bgColor: "bg-purple-100 dark:bg-purple-900/20",
   },
   {
-    title: "System Optimization",
-    description: "Performance & health checks",
-    icon: Zap,
-    href: "/admin/optimization",
-    color: "text-lime-500",
-  },
-  {
-    title: "Manage Streaming Sources",
-    description: "Update 'Where to Watch' data",
-    icon: Tv,
-    href: "/admin/where-to-watch",
+    title: "Bulk Import",
+    description: "Import movies in bulk",
+    icon: Upload,
+    href: "/admin/movies/bulk-import",
     color: "text-orange-500",
+    bgColor: "bg-orange-100 dark:bg-orange-900/20",
   },
   {
-    title: "System Settings",
-    description: "Configure platform settings",
-    icon: Settings,
-    href: "/admin/system",
-    color: "text-slate-500",
+    title: "Verify Professionals",
+    description: "Review verification requests",
+    icon: UserCheck,
+    href: "/admin/industry/verification",
+    color: "text-teal-500",
+    bgColor: "bg-teal-100 dark:bg-teal-900/20",
   },
 ]
 
 export function QuickActions() {
   return (
-    <Card className="h-full flex flex-col">
-      <CardHeader className="pb-2">
-        <CardTitle>Quick Actions</CardTitle>
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-base font-bold">Quick Actions</CardTitle>
         <CardDescription>Common administrative tasks</CardDescription>
       </CardHeader>
-      <CardContent className="flex-grow">
-        <ScrollArea className="h-[350px] md:h-[400px] pr-2">
-          <div className="space-y-2">
-            {actions.map((action, index) => (
-              <motion.div
-                key={action.title}
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.2, delay: index * 0.05 }}
-              >
-                <Button variant="ghost" className="w-full justify-start text-left h-auto py-2.5 px-3" asChild>
-                  <Link href={action.href}>
-                    <div className={`p-1.5 rounded-md bg-muted mr-3`}>
-                      <action.icon size={16} className={action.color} />
-                    </div>
-                    <div>
-                      <div className="text-sm font-medium">{action.title}</div>
-                      <div className="text-xs text-muted-foreground">{action.description}</div>
-                    </div>
-                  </Link>
-                </Button>
-              </motion.div>
-            ))}
-          </div>
-        </ScrollArea>
+      <CardContent>
+        <div className="grid grid-cols-1 gap-3">
+          {quickActions.map((action) => (
+            <Button key={action.title} variant="ghost" className="h-auto p-3 justify-start hover:bg-muted/50" asChild>
+              <Link href={action.href}>
+                <div className={`p-2 rounded-md mr-3 ${action.bgColor}`}>
+                  <action.icon className={`h-4 w-4 ${action.color}`} />
+                </div>
+                <div className="text-left">
+                  <div className="font-medium text-sm">{action.title}</div>
+                  <div className="text-xs text-muted-foreground">{action.description}</div>
+                </div>
+              </Link>
+            </Button>
+          ))}
+        </div>
       </CardContent>
     </Card>
   )

@@ -1,7 +1,6 @@
 "use client"
 
 import type React from "react"
-
 import { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import {
@@ -17,13 +16,16 @@ import {
   ChevronRight,
   Check,
   PlusCircle,
+  User,
+  Camera,
+  Calendar,
 } from "lucide-react"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
-import type { VisualTreat } from "./types"
+import type { VisualTreat } from "@/lib/visual-treats-types"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { useToast } from "@/hooks/use-toast"
 
@@ -32,9 +34,10 @@ interface TreatModalProps {
   isOpen: boolean
   onClose: () => void
   onLikeToggle: (id: string) => void
-  onBookmarkToggle: (id: string) => void
-  onNavigate?: (direction: "prev" | "next") => VisualTreat | null // Optional: for prev/next treat
-  relatedTreats?: VisualTreat[] // Optional: for related treats display
+  onCollectionAction: (treat: VisualTreat) => void
+  isInCollection: boolean
+  onNavigate?: (direction: "prev" | "next") => VisualTreat | null
+  relatedTreats?: VisualTreat[]
 }
 
 export function TreatModal({
@@ -42,7 +45,8 @@ export function TreatModal({
   isOpen,
   onClose,
   onLikeToggle,
-  onBookmarkToggle,
+  onCollectionAction,
+  isInCollection,
   onNavigate,
   relatedTreats = [],
 }: TreatModalProps) {
@@ -52,7 +56,7 @@ export function TreatModal({
 
   useEffect(() => {
     if (treat) {
-      setIsImageLoaded(false) // Reset on new treat
+      setIsImageLoaded(false)
     }
   }, [treat])
 
@@ -60,32 +64,37 @@ export function TreatModal({
     e.stopPropagation()
     if (treat) onLikeToggle(treat.id)
   }
-  const handleBookmark = (e: React.MouseEvent) => {
+  const handleCollectionAction = (e: React.MouseEvent) => {
     e.stopPropagation()
-    if (treat) onBookmarkToggle(treat.id)
+    if (treat) onCollectionAction(treat)
   }
 
   const handleShare = () => {
     if (!treat) return
+    const shareUrl = `${window.location.origin}/visual-treats/${treat.id}`
     if (navigator.share) {
       navigator
         .share({
-          title: treat.title,
+          title: `${treat.title} - from ${treat.film}`,
           text: treat.description,
-          url: window.location.href, // This should ideally be the specific treat's URL
+          url: shareUrl,
         })
         .catch((err) => console.error("Share failed:", err))
     } else {
-      navigator.clipboard.writeText(window.location.href) // Fallback
+      navigator.clipboard.writeText(shareUrl)
       toast({ title: "Link Copied!", description: "Treat URL copied to clipboard." })
     }
   }
 
   const handleDownload = () => {
     if (!treat) return
-    // Mock download
-    toast({ title: "Download Started (Mock)", description: `Downloading ${treat.title}.` })
-    console.log("Download treat:", treat.id)
+    const link = document.createElement("a")
+    link.href = treat.imageUrl
+    link.download = `${treat.film.replace(/ /g, "_")}-${treat.title.replace(/ /g, "_")}.jpg`
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    toast({ title: "Download Started", description: `Downloading ${treat.title}.` })
   }
 
   const handleCopyColor = (color: string) => {
@@ -98,7 +107,6 @@ export function TreatModal({
   const handlePrev = () => onNavigate && onNavigate("prev")
   const handleNext = () => onNavigate && onNavigate("next")
 
-  // Keyboard navigation
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (!isOpen) return
@@ -112,11 +120,9 @@ export function TreatModal({
     return () => window.removeEventListener("keydown", handleKeyDown)
   }, [isOpen, onClose, onNavigate])
 
-  if (!treat) return null
-
   return (
     <AnimatePresence>
-      {isOpen && (
+      {isOpen && treat && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-0 sm:p-4">
           <motion.div
             initial={{ opacity: 0 }}
@@ -148,21 +154,20 @@ export function TreatModal({
           )}
 
           <motion.div
-            initial={{ opacity: 0, scale: 0.9, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.9, y: 20 }}
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
             transition={{ duration: 0.3, ease: "easeInOut" }}
-            className="relative w-full h-full sm:max-w-6xl sm:max-h-[95vh] sm:rounded-lg overflow-hidden bg-[#1A1A1A] border border-gray-700 flex flex-col md:flex-row"
+            className="relative w-full h-full sm:max-w-6xl sm:max-h-[95vh] sm:rounded-lg overflow-hidden bg-[#181818] border border-gray-800 flex flex-col md:flex-row"
           >
-            {/* Image Section */}
             <div className="relative flex-1 md:max-w-[calc(100%-24rem)] min-h-[300px] md:min-h-0 bg-black">
               {!isImageLoaded && (
-                <div className="absolute inset-0 bg-gray-800 animate-pulse flex items-center justify-center">
-                  <div className="w-10 h-10 border-4 border-gray-600 border-t-[#00BFFF] rounded-full animate-spin"></div>
+                <div className="absolute inset-0 bg-gray-900 animate-pulse flex items-center justify-center">
+                  <div className="w-10 h-10 border-4 border-gray-700 border-t-[#00BFFF] rounded-full animate-spin"></div>
                 </div>
               )}
               <Image
-                src={treat.imageUrl || "/placeholder.svg?width=1200&height=800&query=cinematic+detail"}
+                src={treat.imageUrl || "/placeholder.svg"}
                 alt={treat.title}
                 fill
                 className={`object-contain transition-opacity duration-500 ${isImageLoaded ? "opacity-100" : "opacity-0"}`}
@@ -179,12 +184,11 @@ export function TreatModal({
               </Button>
             </div>
 
-            {/* Content Section */}
-            <ScrollArea className="w-full md:w-96 bg-[#1F1F1F] border-l border-gray-700">
+            <ScrollArea className="w-full md:w-96 bg-[#1C1C1C] border-l border-gray-800">
               <div className="p-6 space-y-5">
                 <div>
                   <div className="flex items-center justify-between mb-1">
-                    <Badge variant="outline" className="bg-[#3A3A3A] text-gray-200 border-gray-600 text-xs">
+                    <Badge variant="outline" className="bg-[#282828] text-gray-200 border-gray-700 text-xs">
                       {treat.category}
                     </Badge>
                     <span className="text-xs text-gray-400">{treat.year}</span>
@@ -199,13 +203,15 @@ export function TreatModal({
                       variant="ghost"
                       size="sm"
                       onClick={handleLike}
-                      className={`p-1 h-auto ${treat.userLiked ? "text-red-500" : "text-gray-400 hover:text-red-500"}`}
+                      className={`p-1 h-auto transition-colors ${
+                        treat.userLiked ? "text-red-500" : "text-gray-400 hover:text-red-500"
+                      }`}
                     >
-                      <Heart className={`h-5 w-5 mr-1 ${treat.userLiked ? "fill-current" : ""}`} />
+                      <Heart className={`h-5 w-5 mr-1.5 ${treat.userLiked ? "fill-current" : ""}`} />
                       <span className="text-sm">{treat.likes.toLocaleString()}</span>
                     </Button>
                     <div className="flex items-center text-gray-400 text-sm">
-                      <Eye className="h-5 w-5 mr-1" />
+                      <Eye className="h-5 w-5 mr-1.5" />
                       <span>{treat.views.toLocaleString()}</span>
                     </div>
                   </div>
@@ -213,18 +219,18 @@ export function TreatModal({
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="h-8 w-8 text-gray-400 hover:text-[#00BFFF]"
-                      onClick={handleBookmark}
+                      className="h-8 w-8 text-gray-400 hover:text-[#00BFFF] hover:bg-[#00BFFF]/10 rounded-full"
+                      onClick={handleCollectionAction}
                     >
                       <PlusCircle
-                        className={`h-5 w-5 ${treat.userBookmarked ? "text-[#00BFFF] fill-[#00BFFF]" : ""}`}
+                        className={`h-5 w-5 transition-all ${isInCollection ? "text-[#00BFFF] fill-[#00BFFF]" : ""}`}
                       />
                     </Button>
                     <Button
                       variant="ghost"
                       size="icon"
                       onClick={handleShare}
-                      className="h-8 w-8 text-gray-400 hover:text-white"
+                      className="h-8 w-8 text-gray-400 hover:text-white hover:bg-white/10 rounded-full"
                     >
                       <Share2 className="h-4 w-4" />
                     </Button>
@@ -232,7 +238,7 @@ export function TreatModal({
                       variant="ghost"
                       size="icon"
                       onClick={handleDownload}
-                      className="h-8 w-8 text-gray-400 hover:text-white"
+                      className="h-8 w-8 text-gray-400 hover:text-white hover:bg-white/10 rounded-full"
                     >
                       <Download className="h-4 w-4" />
                     </Button>
@@ -240,99 +246,73 @@ export function TreatModal({
                 </div>
                 <Separator className="bg-gray-700" />
 
-                <Card className="bg-[#282828] border-gray-700 shadow-md">
-                  <CardHeader className="p-4">
-                    <CardTitle className="text-md text-white flex items-center gap-2">
-                      <Film className="h-5 w-5 text-[#00BFFF]" /> Film Details
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="p-4 pt-0 text-sm space-y-1.5">
-                    <div className="flex justify-between">
-                      <span className="text-gray-400">Film:</span>{" "}
-                      <span className="text-gray-100 text-right">{treat.film}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-400">Director:</span>{" "}
-                      <span className="text-gray-100 text-right">{treat.director}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-400">Cinematographer:</span>{" "}
-                      <span className="text-gray-100 text-right">{treat.cinematographer}</span>
-                    </div>
-                  </CardContent>
-                </Card>
+                <div className="grid grid-cols-1 gap-4">
+                  <InfoCard icon={Film} title="Source">
+                    <InfoItem label="Film" value={treat.film} />
+                    <InfoItem icon={User} label="Director" value={treat.director} />
+                    <InfoItem icon={Camera} label="Cinematographer" value={treat.cinematographer} />
+                    <InfoItem
+                      icon={Calendar}
+                      label="Released"
+                      value={new Date(treat.releaseDate).toLocaleDateString("en-US", {
+                        year: "numeric",
+                        month: "long",
+                        day: "numeric",
+                      })}
+                    />
+                  </InfoCard>
 
-                {treat.colorPalette && treat.colorPalette.length > 0 && (
-                  <Card className="bg-[#282828] border-gray-700 shadow-md">
-                    <CardHeader className="p-4">
-                      <CardTitle className="text-md text-white flex items-center gap-2">
-                        <Palette className="h-5 w-5 text-[#00BFFF]" /> Color Palette
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="p-4 pt-0">
-                      <div className="grid grid-cols-5 gap-2">
+                  {treat.colorPalette && treat.colorPalette.length > 0 && (
+                    <InfoCard icon={Palette} title="Color Palette">
+                      <div className="grid grid-cols-5 gap-2 pt-2">
                         {treat.colorPalette.map((color, index) => (
                           <div key={index} className="space-y-1 group relative">
                             <div
-                              className="w-full h-12 rounded border border-gray-600 cursor-pointer transition-transform group-hover:scale-105"
+                              className="w-full h-12 rounded-md border border-gray-600 cursor-pointer transition-transform group-hover:scale-105"
                               style={{ backgroundColor: color }}
                               onClick={() => handleCopyColor(color)}
                             />
-                            <div className="text-xs text-gray-400 text-center font-mono truncate" title={color}>
-                              {color}
-                            </div>
                             {copiedColor === color && (
                               <Check className="absolute top-1 right-1 h-4 w-4 text-white bg-green-500 rounded-full p-0.5" />
                             )}
                           </div>
                         ))}
                       </div>
-                    </CardContent>
-                  </Card>
-                )}
+                    </InfoCard>
+                  )}
 
-                {treat.tags && treat.tags.length > 0 && (
-                  <Card className="bg-[#282828] border-gray-700 shadow-md">
-                    <CardHeader className="p-4">
-                      <CardTitle className="text-md text-white flex items-center gap-2">
-                        <Tag className="h-5 w-5 text-[#00BFFF]" /> Tags
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="p-4 pt-0">
-                      <div className="flex flex-wrap gap-2">
+                  {treat.tags && treat.tags.length > 0 && (
+                    <InfoCard icon={Tag} title="Tags">
+                      <div className="flex flex-wrap gap-2 pt-2">
                         {treat.tags.map((tag) => (
                           <Badge
                             key={tag}
                             variant="secondary"
-                            className="bg-[#3A3A3A] text-gray-200 border-gray-600 hover:bg-[#4F4F4F] text-xs"
+                            className="bg-[#282828] text-gray-300 border-gray-700 hover:bg-[#333] text-xs"
                           >
                             {tag}
                           </Badge>
                         ))}
                       </div>
-                    </CardContent>
-                  </Card>
-                )}
+                    </InfoCard>
+                  )}
+                </div>
 
-                {/* Related Treats Section (Mock) */}
                 {relatedTreats && relatedTreats.length > 0 && (
-                  <Card className="bg-[#282828] border-gray-700 shadow-md">
-                    <CardHeader className="p-4">
-                      <CardTitle className="text-md text-white">Related Treats</CardTitle>
-                    </CardHeader>
-                    <CardContent className="p-4 pt-0 space-y-2">
+                  <div className="pt-2">
+                    <h3 className="text-lg font-semibold text-white mb-2">Similar Visual DNA</h3>
+                    <div className="space-y-2">
                       {relatedTreats.slice(0, 3).map((rt) => (
                         <div
                           key={rt.id}
-                          className="flex items-center gap-2 p-2 rounded hover:bg-[#3A3A3A] cursor-pointer"
-                          onClick={() => console.log("Navigate to related treat", rt.id) /* Placeholder */}
+                          className="flex items-center gap-3 p-2 rounded-lg hover:bg-[#282828] cursor-pointer transition-colors"
                         >
                           <Image
                             src={rt.imageUrl || "/placeholder.svg"}
                             alt={rt.title}
-                            width={40}
-                            height={60}
-                            className="rounded object-cover aspect-[2/3]"
+                            width={48}
+                            height={48}
+                            className="rounded-md object-cover aspect-square"
                           />
                           <div>
                             <p className="text-sm text-white font-medium line-clamp-1">{rt.title}</p>
@@ -340,13 +320,9 @@ export function TreatModal({
                           </div>
                         </div>
                       ))}
-                    </CardContent>
-                  </Card>
+                    </div>
+                  </div>
                 )}
-
-                <div className="flex gap-3 pt-2">
-                  <Button className="flex-1 bg-[#00BFFF] hover:bg-[#00BFFF]/90 text-white">View Film Details</Button>
-                </div>
               </div>
             </ScrollArea>
           </motion.div>
@@ -355,3 +331,28 @@ export function TreatModal({
     </AnimatePresence>
   )
 }
+
+const InfoCard = ({
+  icon: Icon,
+  title,
+  children,
+}: { icon: React.ElementType; title: string; children: React.ReactNode }) => (
+  <Card className="bg-[#222] border-gray-800 shadow-md">
+    <CardHeader className="p-4">
+      <CardTitle className="text-md text-white flex items-center gap-2">
+        <Icon className="h-5 w-5 text-[#00BFFF]" /> {title}
+      </CardTitle>
+    </CardHeader>
+    <CardContent className="p-4 pt-0 text-sm space-y-2">{children}</CardContent>
+  </Card>
+)
+
+const InfoItem = ({ label, value, icon: Icon }: { label: string; value: string; icon?: React.ElementType }) => (
+  <div className="flex justify-between items-center">
+    <span className="text-gray-400 flex items-center gap-2">
+      {Icon && <Icon className="h-4 w-4" />}
+      {label}:
+    </span>
+    <span className="text-gray-100 text-right font-medium">{value}</span>
+  </div>
+)
