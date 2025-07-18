@@ -146,6 +146,18 @@ export interface AwardCeremony {
   currentYear?: number // The most recent or upcoming year
 }
 
+// Add the new interface
+export interface Award {
+  id: string
+  name: string
+  category: string
+  event: string
+  year: number
+  nominee: string
+  movie: string
+  winner: boolean
+}
+
 // Mock data for all movies (simplified)
 const allMockMovies: Movie[] = [
   // Sci-Fi
@@ -607,7 +619,6 @@ const mockGenreDetailsStore: Record<string, GenreDetails> = {
         {
           id: "actorD3",
           name: "Leonardo DiCaprio",
-          movieCount: 18,
           imageUrl: "/leonardo-dicaprio.png",
           profileUrl: "/people/actorD3",
         },

@@ -4,188 +4,146 @@ import type React from "react"
 
 import { useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { Plus, Minus } from "lucide-react"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { X, Upload, Search } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
-import { Switch } from "@/components/ui/switch"
 import { Label } from "@/components/ui/label"
-import { Badge } from "@/components/ui/badge"
-import type { CreateCollectionData } from "./types"
+import { Switch } from "@/components/ui/switch"
 
 interface CreateCollectionModalProps {
   isOpen: boolean
   onClose: () => void
-  onSubmit: (data: CreateCollectionData) => void
+  onCreateCollection: (collection: any) => void
 }
 
-export function CreateCollectionModal({ isOpen, onClose, onSubmit }: CreateCollectionModalProps) {
-  const [formData, setFormData] = useState<CreateCollectionData>({
-    title: "",
-    description: "",
-    isPublic: true,
-    tags: [],
-  })
-  const [newTag, setNewTag] = useState("")
+export function CreateCollectionModal({ isOpen, onClose, onCreateCollection }: CreateCollectionModalProps) {
+  const [title, setTitle] = useState("")
+  const [description, setDescription] = useState("")
+  const [isPublic, setIsPublic] = useState(true)
+  const [selectedMovies, setSelectedMovies] = useState<any[]>([])
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    if (formData.title.trim()) {
-      onSubmit(formData)
-      setFormData({ title: "", description: "", isPublic: true, tags: [] })
-      setNewTag("")
-    }
-  }
 
-  const addTag = () => {
-    if (newTag.trim() && !formData.tags.includes(newTag.trim())) {
-      setFormData((prev) => ({
-        ...prev,
-        tags: [...prev.tags, newTag.trim()],
-      }))
-      setNewTag("")
+    const newCollection = {
+      id: `user-${Date.now()}`,
+      title,
+      description,
+      creator: "You",
+      movieCount: selectedMovies.length,
+      followers: 0,
+      isPublic,
+      posterImages: [
+        "/inception-movie-poster.png",
+        "/dark-knight-poster.png",
+        "/interstellar-poster.png",
+        "/oppenheimer-inspired-poster.png",
+      ],
+      createdAt: new Date().toISOString(),
     }
-  }
 
-  const removeTag = (tagToRemove: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      tags: prev.tags.filter((tag) => tag !== tagToRemove),
-    }))
-  }
+    onCreateCollection(newCollection)
+    onClose()
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter") {
-      e.preventDefault()
-      addTag()
-    }
+    // Reset form
+    setTitle("")
+    setDescription("")
+    setSelectedMovies([])
   }
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="bg-siddu-dark-grey border-siddu-dark-grey text-siddu-text-primary max-w-md">
-        <DialogHeader>
-          <DialogTitle className="text-xl font-bold">Create New Collection</DialogTitle>
-        </DialogHeader>
+    <AnimatePresence>
+      {isOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <motion.div
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={onClose}
+          />
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Title */}
-          <div className="space-y-2">
-            <Label htmlFor="title" className="text-siddu-text-primary">
-              Collection Title *
-            </Label>
-            <Input
-              id="title"
-              value={formData.title}
-              onChange={(e) => setFormData((prev) => ({ ...prev, title: e.target.value }))}
-              placeholder="Enter collection title..."
-              className="bg-siddu-deep-night border-siddu-deep-night text-siddu-text-primary"
-              required
-            />
-          </div>
-
-          {/* Description */}
-          <div className="space-y-2">
-            <Label htmlFor="description" className="text-siddu-text-primary">
-              Description
-            </Label>
-            <Textarea
-              id="description"
-              value={formData.description}
-              onChange={(e) => setFormData((prev) => ({ ...prev, description: e.target.value }))}
-              placeholder="Describe your collection..."
-              className="bg-siddu-deep-night border-siddu-deep-night text-siddu-text-primary resize-none"
-              rows={3}
-            />
-          </div>
-
-          {/* Tags */}
-          <div className="space-y-2">
-            <Label className="text-siddu-text-primary">Tags</Label>
-            <div className="flex gap-2">
-              <Input
-                value={newTag}
-                onChange={(e) => setNewTag(e.target.value)}
-                onKeyPress={handleKeyPress}
-                placeholder="Add a tag..."
-                className="bg-siddu-deep-night border-siddu-deep-night text-siddu-text-primary"
-              />
-              <Button
-                type="button"
-                onClick={addTag}
-                size="sm"
-                className="bg-siddu-electric-blue text-siddu-deep-night hover:bg-siddu-electric-blue/90"
-              >
-                <Plus className="h-4 w-4" />
+          <motion.div
+            className="relative bg-[#1E1E1E] rounded-lg border border-[#333333] w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto"
+            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: 20 }}
+            transition={{ duration: 0.2 }}
+          >
+            <div className="flex items-center justify-between p-6 border-b border-[#333333]">
+              <h2 className="text-xl font-bold text-white">Create New Collection</h2>
+              <Button variant="ghost" size="icon" onClick={onClose} className="text-[#A0A0A0] hover:text-white">
+                <X className="h-4 w-4" />
               </Button>
             </div>
-            {formData.tags.length > 0 && (
-              <div className="flex flex-wrap gap-2 mt-2">
-                <AnimatePresence>
-                  {formData.tags.map((tag) => (
-                    <motion.div
-                      key={tag}
-                      initial={{ opacity: 0, scale: 0.8 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0.8 }}
-                      transition={{ duration: 0.2 }}
-                    >
-                      <Badge
-                        variant="secondary"
-                        className="bg-siddu-electric-blue/20 text-siddu-electric-blue border-siddu-electric-blue/30"
-                      >
-                        {tag}
-                        <button
-                          type="button"
-                          onClick={() => removeTag(tag)}
-                          className="ml-1 hover:text-siddu-text-primary"
-                        >
-                          <Minus className="h-3 w-3" />
-                        </button>
-                      </Badge>
-                    </motion.div>
-                  ))}
-                </AnimatePresence>
+
+            <form onSubmit={handleSubmit} className="p-6 space-y-6">
+              <div className="space-y-2">
+                <Label htmlFor="title" className="text-white">
+                  Collection Title
+                </Label>
+                <Input
+                  id="title"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  placeholder="Enter collection title..."
+                  className="bg-[#2A2A2A] border-[#444444] text-white"
+                  required
+                />
               </div>
-            )}
-          </div>
 
-          {/* Privacy */}
-          <div className="flex items-center justify-between">
-            <div className="space-y-1">
-              <Label htmlFor="public" className="text-siddu-text-primary">
-                Public Collection
-              </Label>
-              <p className="text-sm text-siddu-text-subtle">Allow others to discover and follow your collection</p>
-            </div>
-            <Switch
-              id="public"
-              checked={formData.isPublic}
-              onCheckedChange={(checked) => setFormData((prev) => ({ ...prev, isPublic: checked }))}
-            />
-          </div>
+              <div className="space-y-2">
+                <Label htmlFor="description" className="text-white">
+                  Description
+                </Label>
+                <Textarea
+                  id="description"
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  placeholder="Describe your collection..."
+                  className="bg-[#2A2A2A] border-[#444444] text-white min-h-[100px]"
+                />
+              </div>
 
-          {/* Actions */}
-          <div className="flex gap-3 pt-4">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={onClose}
-              className="flex-1 border-siddu-dark-grey text-siddu-text-primary bg-transparent"
-            >
-              Cancel
-            </Button>
-            <Button
-              type="submit"
-              className="flex-1 bg-siddu-electric-blue text-siddu-deep-night hover:bg-siddu-electric-blue/90"
-              disabled={!formData.title.trim()}
-            >
-              Create Collection
-            </Button>
-          </div>
-        </form>
-      </DialogContent>
-    </Dialog>
+              <div className="flex items-center justify-between">
+                <div className="space-y-1">
+                  <Label className="text-white">Public Collection</Label>
+                  <p className="text-sm text-[#A0A0A0]">Allow others to discover and follow this collection</p>
+                </div>
+                <Switch checked={isPublic} onCheckedChange={setIsPublic} />
+              </div>
+
+              <div className="space-y-4">
+                <Label className="text-white">Add Movies</Label>
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#A0A0A0]" />
+                  <Input
+                    placeholder="Search for movies to add..."
+                    className="pl-10 bg-[#2A2A2A] border-[#444444] text-white"
+                  />
+                </div>
+
+                {selectedMovies.length === 0 && (
+                  <div className="text-center py-8 text-[#A0A0A0]">
+                    <Upload className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                    <p>Search and add movies to your collection</p>
+                  </div>
+                )}
+              </div>
+
+              <div className="flex justify-end space-x-3 pt-4 border-t border-[#333333]">
+                <Button type="button" variant="outline" onClick={onClose} className="border-[#444444] text-[#A0A0A0]">
+                  Cancel
+                </Button>
+                <Button type="submit" className="bg-[#6e4bbd] hover:bg-[#5d3ba9] text-white">
+                  Create Collection
+                </Button>
+              </div>
+            </form>
+          </motion.div>
+        </div>
+      )}
+    </AnimatePresence>
   )
 }

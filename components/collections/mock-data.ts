@@ -175,8 +175,3 @@ export const mockCollections: Collection[] = [
     type: "user",
   },
 ]
-
-// Legacy exports for backward compatibility
-export const mockFeaturedCollections: Collection[] = mockCollections.filter((c) => c.type === "featured")
-export const mockPopularCollections: Collection[] = mockCollections.filter((c) => c.type === "popular")
-export const mockUserCollections: Collection[] = mockCollections.filter((c) => c.type === "user")

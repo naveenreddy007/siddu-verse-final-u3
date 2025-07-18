@@ -32,7 +32,6 @@ const config = {
         "siddu-text-secondary": "#A0A0A0",
       },
       borderRadius: {
-        ...defaultConfig.theme.extend.borderRadius,
         lg: "0.75rem",
         md: "calc(0.75rem - 2px)",
         sm: "calc(0.75rem - 4px)",
