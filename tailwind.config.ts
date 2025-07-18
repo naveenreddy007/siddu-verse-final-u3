@@ -1,17 +1,15 @@
 import type { Config } from "tailwindcss"
-import { fontFamily } from "tailwindcss/defaultTheme"
-import plugin from "tailwindcss/plugin"
 
-const config = {
+// all in fixtures is set to tailwind v3 as interims solutions
+
+const config: Config = {
   darkMode: ["class"],
   content: [
-    "./pages/**/*.{ts,tsx}",
-    "./components/**/*.{ts,tsx}",
-    "./app/**/*.{ts,tsx}",
-    "./src/**/*.{ts,tsx}",
+    "./pages/**/*.{js,ts,jsx,tsx,mdx}",
+    "./components/**/*.{js,ts,jsx,tsx,mdx}",
+    "./app/**/*.{js,ts,jsx,tsx,mdx}",
     "*.{js,ts,jsx,tsx,mdx}",
   ],
-  prefix: "",
   theme: {
     container: {
       center: true,
@@ -21,17 +19,17 @@ const config = {
       },
     },
     extend: {
-      fontFamily: {
-        sans: ["var(--font-inter)", ...fontFamily.sans], // Default sans font
-        inter: ["var(--font-inter)"], // Utility class 'font-inter'
-        dmsans: ["var(--font-dm-sans)"], // Utility class 'font-dmsans'
-      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
+        "siddu-deep-night": "hsl(var(--siddu-deep-night))",
+        "siddu-dark-grey": "hsl(var(--siddu-dark-grey))",
+        "siddu-electric-blue": "hsl(var(--siddu-electric-blue))",
+        "primary-light": "hsl(var(--primary-light))",
+        "secondary-subtle": "hsl(var(--secondary-subtle))",
         primary: {
           DEFAULT: "hsl(var(--primary))",
           foreground: "hsl(var(--primary-foreground))",
@@ -66,6 +64,10 @@ const config = {
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
       },
+      fontFamily: {
+        sans: ["var(--font-dm-sans)"],
+        inter: ["var(--font-inter)"],
+      },
       keyframes: {
         "accordion-down": {
           from: { height: "0" },
@@ -82,26 +84,6 @@ const config = {
       },
     },
   },
-  plugins: [
-    require("tailwindcss-animate"),
-    plugin(({ addUtilities }) => {
-      addUtilities({
-        ".shadow-text": {
-          textShadow: "0px 1px 3px rgba(0, 0, 0, 0.5)",
-        },
-        ".scrollbar-hide": {
-          /* IE and Edge */
-          "-ms-overflow-style": "none",
-          /* Firefox */
-          "scrollbar-width": "none",
-          /* Safari and Chrome */
-          "&::-webkit-scrollbar": {
-            display: "none",
-          },
-        },
-      })
-    }),
-  ],
-} satisfies Config
-
+  plugins: [require("tailwindcss-animate")],
+}
 export default config

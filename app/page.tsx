@@ -5,6 +5,9 @@ import { Suspense, useRef } from "react"
 import dynamic from "next/dynamic"
 import { useScroll, motion, type MotionValue } from "framer-motion"
 import { useTransform } from "framer-motion"
+import { getAgentCategories, getAgentsByCategory } from "@/lib/agent-data"
+import { AgentCard } from "@/components/agent-card"
+import { Badge } from "@/components/ui/badge"
 
 // Skeletons
 import SectionSkeleton from "@/components/skeletons/section-skeleton"
@@ -104,8 +107,47 @@ export default function HomePage() {
     offset: ["start start", "end end"], // Track from when top of target hits top of viewport, to when bottom of target hits bottom.
   })
 
+  const categories = getAgentCategories()
+
   return (
-    <div ref={pageRef} className="bg-black text-white flex flex-col min-h-screen overflow-x-hidden">
+    <div
+      ref={pageRef}
+      className="bg-black text-white flex flex-col min-h-screen overflow-x-hidden container mx-auto px-4 py-8"
+    >
+      <header className="text-center mb-12">
+        <h1 className="text-4xl md:text-5xl font-bold font-inter bg-clip-text text-transparent bg-gradient-to-r from-primary-light to-siddu-electric-blue/80 mb-4">
+          AI Agent Scanner
+        </h1>
+        <p className="text-lg text-secondary-subtle max-w-2xl mx-auto font-dm-sans">
+          An explorable directory of autonomous agents powering the next generation of digital organizations. Scan and
+          understand their architecture.
+        </p>
+      </header>
+
+      <div className="space-y-12">
+        {categories.map((category) => {
+          const agents = getAgentsByCategory(category)
+          return (
+            <section key={category}>
+              <h2 className="text-2xl font-bold font-inter text-primary-light mb-6 flex items-center">
+                {category}
+                <Badge
+                  variant="secondary"
+                  className="ml-3 bg-siddu-dark-grey text-siddu-electric-blue border-siddu-electric-blue/50"
+                >
+                  {agents.length} Agents
+                </Badge>
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {agents.map((agent) => (
+                  <AgentCard key={agent.id} agent={agent} />
+                ))}
+              </div>
+            </section>
+          )
+        })}
+      </div>
+
       <Suspense
         fallback={<SectionSkeleton message="Loading Personalized Insights..." heightClass="h-auto md:h-[480px]" />}
       >

@@ -6,12 +6,10 @@ import { ThemeProvider } from "@/components/theme-provider"
 import { Toaster } from "@/components/ui/toaster"
 import { TopNavigation } from "@/components/navigation/top-navigation"
 import { BottomNavigation } from "@/components/navigation/bottom-navigation"
+import OfflineBanner from "@/components/pwa/offline-banner"
+import UpdateNotification from "@/components/pwa/update-notification"
+import InstallPrompt from "@/components/pwa/install-prompt"
 // import { MotionLazyContainer } from "@/components/animate/motion-lazy-container" // Optional
-
-// PWA components - keep commented if not fully implemented or causing issues
-// import { InstallPrompt } from "@/components/pwa/install-prompt"
-// import { OfflineBanner } from "@/components/pwa/offline-banner"
-// import { UpdateNotification } from "@/components/pwa/update-notification"
 
 const inter = Inter({
   subsets: ["latin"],
@@ -35,7 +33,7 @@ export const metadata: Metadata = {
     apple: "/icons/apple-touch-icon.png",
     icon: "/favicon.ico",
   },
-    generator: 'v0.dev'
+  generator: "v0.dev",
 }
 
 export const viewport: Viewport = {
@@ -61,9 +59,10 @@ export default function RootLayout({
           </main>
           <BottomNavigation />
           <Toaster />
-          {/* <InstallPrompt /> */}
-          {/* <OfflineBanner /> */}
-          {/* <UpdateNotification /> */}
+          {/* PWA components */}
+          <OfflineBanner />
+          <UpdateNotification />
+          <InstallPrompt />
           {/* </MotionLazyContainer> */}
         </ThemeProvider>
       </body>
