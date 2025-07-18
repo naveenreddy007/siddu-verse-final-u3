@@ -1,45 +1,182 @@
 import type { Collection } from "./types"
 
-export const mockFeaturedCollections: Collection[] = [
+const allPosterImages = [
+  "/interstellar-poster.png",
+  "/dune-part-two-poster.png",
+  "/blade-runner-2049-poster.png",
+  "/arrival-poster.png",
+  "/the-creator-poster.png",
+  "/matrix-poster.png",
+  "/inception-movie-poster.png",
+  "/tenet-movie-poster.png",
+  "/oppenheimer-inspired-poster.png",
+  "/dark-knight-poster.png",
+  "/joker-movie-poster.png",
+  "/parasite-movie-poster.png",
+  "/grand-budapest-hotel-poster.png",
+  "/everything-everywhere-poster.png",
+  "/hereditary-poster.png",
+  "/ex-machina-poster.png",
+  "/ghost-in-the-shell-poster.png",
+  "/oldboy-poster.png",
+  "/burning-poster.png",
+]
+
+const generateRandomPosters = (count: number) => {
+  const shuffled = allPosterImages.sort(() => 0.5 - Math.random())
+  return shuffled.slice(0, count)
+}
+
+export const mockCollections: Collection[] = [
   {
     id: "featured-1",
-    title: "Featured Collection 1",
-    description: "A curated collection of placeholder items.",
+    title: "Mind-Bending Sci-Fi",
+    description:
+      "Explore films that challenge your perception of reality, time, and consciousness. A journey into the unknown.",
     creator: "Siddu Editorial",
-    movieCount: 2,
-    followers: 100,
-    posterImages: ["/placeholder.svg?height=150&width=100", "/placeholder.svg?height=150&width=100"],
-    createdAt: "2024-01-15T00:00:00Z",
+    creatorAvatar: "/placeholder-logo.png",
+    movieCount: 18,
+    followers: 12500,
+    posterImages: generateRandomPosters(4),
+    isPublic: true,
+    createdAt: "2025-07-10T10:00:00Z",
+    updatedAt: "2025-07-15T11:30:00Z",
+    tags: ["Sci-Fi", "Psychological", "Complex Narrative", "Futuristic"],
+    type: "featured",
   },
-]
-
-export const mockPopularCollections: Collection[] = [
+  {
+    id: "featured-2",
+    title: "Nolan's Labyrinths",
+    description:
+      "A deep dive into the intricate and non-linear worlds crafted by visionary director Christopher Nolan.",
+    creator: "Siddu Editorial",
+    creatorAvatar: "/placeholder-logo.png",
+    movieCount: 9,
+    followers: 22300,
+    posterImages: [
+      "/inception-movie-poster.png",
+      "/interstellar-poster.png",
+      "/tenet-movie-poster.png",
+      "/dark-knight-poster.png",
+    ],
+    isPublic: true,
+    createdAt: "2025-06-20T09:00:00Z",
+    updatedAt: "2025-07-12T14:00:00Z",
+    tags: ["Christopher Nolan", "Auteur", "Blockbuster", "Mind-Bending"],
+    type: "featured",
+  },
   {
     id: "popular-1",
-    title: "Popular Collection 1",
-    description: "Most popular placeholder items.",
-    creator: "UserX",
-    movieCount: 3,
-    followers: 200,
+    title: "Modern Action Masterpieces",
+    description:
+      "Adrenaline-pumping films from the 21st century that redefined the action genre with stunning choreography and practical effects.",
+    creator: "ActionFan22",
+    creatorAvatar: "/user-avatar-1.png",
+    movieCount: 25,
+    followers: 8400,
+    posterImages: generateRandomPosters(4),
+    isPublic: true,
+    createdAt: "2025-03-12T18:00:00Z",
+    updatedAt: "2025-07-18T09:00:00Z",
+    tags: ["Action", "Stunts", "High-Octane", "2010s", "2020s"],
+    type: "popular",
+  },
+  {
+    id: "popular-2",
+    title: "A24 Aesthetic",
+    description:
+      "A collection of critically acclaimed and visually distinct films from the powerhouse independent studio, A24.",
+    creator: "IndieQueen",
+    creatorAvatar: "/user-avatar-2.png",
+    movieCount: 32,
+    followers: 15600,
     posterImages: [
-      "/placeholder.svg?height=150&width=100",
-      "/placeholder.svg?height=150&width=100",
-      "/placeholder.svg?height=150&width=100",
+      "/everything-everywhere-poster.png",
+      "/moonlight-poster.png",
+      "/hereditary-poster.png",
+      "/ex-machina-poster.png",
     ],
-    createdAt: "2023-12-01T00:00:00Z",
+    isPublic: true,
+    createdAt: "2025-01-05T12:00:00Z",
+    updatedAt: "2025-07-17T20:00:00Z",
+    tags: ["A24", "Indie", "Visually Stunning", "Drama", "Horror"],
+    type: "popular",
+  },
+  {
+    id: "user-1",
+    title: "My Comfort Movies",
+    description:
+      "The films I turn to for a guaranteed good time. A mix of comedy, animation, and heartwarming stories.",
+    creator: "You",
+    creatorAvatar: "/user-avatar-3.png",
+    movieCount: 12,
+    followers: 0,
+    posterImages: generateRandomPosters(4),
+    isPublic: false,
+    createdAt: "2025-07-01T15:00:00Z",
+    updatedAt: "2025-07-16T18:45:00Z",
+    tags: ["Comedy", "Animation", "Feel-Good"],
+    type: "user",
+  },
+  {
+    id: "recommended-1",
+    title: "Because You Watched 'Blade Runner 2049'",
+    description:
+      "If you enjoyed the neo-noir atmosphere and philosophical questions of Blade Runner 2049, you'll love these.",
+    creator: "For You",
+    creatorAvatar: "/siddu-icon-glow.png",
+    movieCount: 8,
+    followers: 0,
+    posterImages: [
+      "/arrival-poster.png",
+      "/ex-machina-poster.png",
+      "/ghost-in-the-shell-poster.png",
+      "/dune-part-two-poster.png",
+    ],
+    isPublic: true,
+    createdAt: "2025-07-18T00:00:00Z",
+    updatedAt: "2025-07-18T00:00:00Z",
+    tags: ["Sci-Fi", "Neo-Noir", "Dystopian", "AI"],
+    type: "recommended",
+  },
+  {
+    id: "popular-3",
+    title: "South Korean Cinema Gems",
+    description: "Beyond Parasite. A curated list of must-watch films from South Korea's vibrant movie industry.",
+    creator: "Cinephile_SK",
+    creatorAvatar: "/user-avatar-4.png",
+    movieCount: 15,
+    followers: 9800,
+    posterImages: [
+      "/parasite-movie-poster.png",
+      "/oldboy-poster.png",
+      "/the-handmaiden-inspired-poster.png",
+      "/burning-poster.png",
+    ],
+    isPublic: true,
+    createdAt: "2024-11-22T10:00:00Z",
+    updatedAt: "2025-07-14T12:00:00Z",
+    tags: ["South Korea", "Thriller", "Drama", "International"],
+    type: "popular",
+  },
+  {
+    id: "user-2",
+    title: "Horror Marathon",
+    description: "My personal list for a spooky movie night. Not for the faint of heart.",
+    creator: "You",
+    creatorAvatar: "/user-avatar-3.png",
+    movieCount: 7,
+    followers: 0,
+    posterImages: generateRandomPosters(4),
+    isPublic: true,
+    createdAt: "2025-05-13T21:00:00Z",
+    updatedAt: "2025-07-02T22:10:00Z",
+    tags: ["Horror", "Supernatural", "Slasher"],
+    type: "user",
   },
 ]
 
-export const mockUserCollections: Collection[] = [
-  {
-    id: "user-1",
-    title: "My Placeholder Watchlist",
-    description: "Items I plan to watch.",
-    creator: "You",
-    movieCount: 1,
-    followers: 0,
-    posterImages: ["/placeholder.svg?height=150&width=100"],
-    isPublic: false,
-    createdAt: "2024-01-20T00:00:00Z",
-  },
-]
+// Legacy exports for backward compatibility
+export const mockFeaturedCollections: Collection[] = mockCollections.filter((c) => c.type === "featured")
+export const mockPopularCollections: Collection[] = mockCollections.filter((c) => c.type === "popular")
+export const mockUserCollections: Collection[] = mockCollections.filter((c) => c.type === "user")

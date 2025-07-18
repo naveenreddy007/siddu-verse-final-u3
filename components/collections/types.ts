@@ -3,20 +3,20 @@ export interface Collection {
   title: string
   description: string
   creator: string
+  creatorAvatar: string
   movieCount: number
   followers: number
   posterImages: string[]
-  isPublic?: boolean
+  isPublic: boolean
   createdAt: string
   updatedAt?: string
   tags?: string[]
+  type: "featured" | "popular" | "user" | "recommended"
 }
 
-export interface Movie {
-  id: string
+export interface CreateCollectionData {
   title: string
-  year: number
-  poster: string
-  rating: number
-  genres: string[]
+  description: string
+  isPublic: boolean
+  tags: string[]
 }

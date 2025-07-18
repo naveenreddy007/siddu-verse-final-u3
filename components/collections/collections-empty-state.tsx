@@ -1,37 +1,59 @@
 "use client"
 
 import { motion } from "framer-motion"
-import { Plus, Film } from "lucide-react"
+import { Film, Plus, Search } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
 export function CollectionsEmptyState() {
   return (
     <motion.div
-      className="text-center py-16"
+      className="flex flex-col items-center justify-center py-16 text-center"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
     >
-      <div className="max-w-md mx-auto">
-        <div className="relative mb-6">
-          <div className="w-20 h-20 mx-auto bg-[#2A2A2A] rounded-full flex items-center justify-center">
-            <Film className="h-8 w-8 text-[#6e4bbd]" />
-          </div>
-          <div className="absolute -top-1 -right-1 w-8 h-8 bg-[#6e4bbd] rounded-full flex items-center justify-center">
-            <Plus className="h-4 w-4 text-white" />
-          </div>
-        </div>
+      <motion.div
+        className="mb-6 rounded-full bg-siddu-dark-grey p-6"
+        initial={{ scale: 0 }}
+        animate={{ scale: 1 }}
+        transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
+      >
+        <Film className="h-12 w-12 text-siddu-text-subtle" />
+      </motion.div>
 
-        <h3 className="text-xl font-bold text-white mb-2">Create Your First Collection</h3>
-        <p className="text-[#A0A0A0] mb-6">
-          Organize your favorite movies into personalized collections and share them with the community.
-        </p>
+      <motion.h3
+        className="mb-2 text-xl font-semibold text-siddu-text-primary"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.3 }}
+      >
+        No collections found
+      </motion.h3>
 
-        <Button className="bg-[#6e4bbd] hover:bg-[#5d3ba9] text-white">
-          <Plus className="h-4 w-4 mr-2" />
+      <motion.p
+        className="mb-8 max-w-md text-siddu-text-secondary"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.4 }}
+      >
+        Try adjusting your search terms or filters, or create your own collection to get started.
+      </motion.p>
+
+      <motion.div
+        className="flex flex-col gap-3 sm:flex-row"
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.5 }}
+      >
+        <Button className="bg-siddu-electric-blue text-siddu-deep-night hover:bg-siddu-electric-blue/90">
+          <Plus className="mr-2 h-4 w-4" />
           Create Collection
         </Button>
-      </div>
+        <Button variant="outline" className="border-siddu-dark-grey text-siddu-text-primary bg-transparent">
+          <Search className="mr-2 h-4 w-4" />
+          Clear Filters
+        </Button>
+      </motion.div>
     </motion.div>
   )
 }

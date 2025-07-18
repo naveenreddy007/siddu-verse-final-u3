@@ -1,121 +1,155 @@
 "use client"
 
+import { useState } from "react"
 import { motion } from "framer-motion"
-import Image from "next/image"
-import Link from "next/link"
-import { Heart, MoreVertical, Play, Share2, Trash2, Users } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import { Users, Film, Lock, Star, Crown, TrendingUp, Sparkles } from "lucide-react"
+import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import type { Collection } from "./types"
 
 interface CollectionCardProps {
   collection: Collection
-  variant: "featured" | "popular" | "user"
-  onDelete?: () => void
 }
 
-export function CollectionCard({ collection, variant, onDelete }: CollectionCardProps) {
-  const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: { duration: 0.4 },
-    },
-  }
+const typeIcons = {
+  featured: Crown,
+  popular: TrendingUp,
+  user: Users,
+  recommended: Sparkles,
+}
+
+const typeColors = {
+  featured: "text-yellow-400",
+  popular: "text-orange-400",
+  user: "text-blue-400",
+  recommended: "text-purple-400",
+}
+
+export function CollectionCard({ collection }: CollectionCardProps) {
+  const [isHovered, setIsHovered] = useState(false)
+  const TypeIcon = typeIcons[collection.type]
 
   return (
     <motion.div
-      variants={itemVariants}
-      whileHover={{ y: -5, transition: { duration: 0.2 } }}
-      className="group relative bg-[#1E1E1E] rounded-lg overflow-hidden border border-[#333333] hover:border-[#6e4bbd] transition-all duration-300"
+      whileHover={{ scale: 1.02 }}
+      whileTap={{ scale: 0.98 }}
+      onHoverStart={() => setIsHovered(true)}
+      onHoverEnd={() => setIsHovered(false)}
     >
-      <Link href={`/collections/${collection.id}`}>
+      <Card className="group relative overflow-hidden bg-siddu-dark-grey border-siddu-dark-grey hover:border-siddu-electric-blue/50 transition-all duration-300 cursor-pointer">
+        {/* Poster Grid */}
         <div className="relative aspect-[4/3] overflow-hidden">
-          {/* 4-poster collage */}
-          <div className="grid grid-cols-2 h-full">
+          <div className="grid h-full grid-cols-2 gap-1 p-2">
             {collection.posterImages.slice(0, 4).map((poster, index) => (
-              <div key={index} className="relative overflow-hidden">
-                <Image
+              <motion.div
+                key={index}
+                className="relative overflow-hidden rounded-md bg-siddu-deep-night"
+                initial={{ opacity: 0.8 }}
+                animate={{ opacity: isHovered ? 1 : 0.8 }}
+                transition={{ duration: 0.3, delay: index * 0.05 }}
+              >
+                <img
                   src={poster || "/placeholder.svg"}
                   alt=""
-                  fill
-                  className="object-cover transition-transform group-hover:scale-110"
-                  sizes="(max-width: 768px) 50vw, 25vw"
+                  className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-110"
                 />
-              </div>
+                <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+              </motion.div>
             ))}
           </div>
 
-          {/* Overlay */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
-            <div className="absolute bottom-4 left-4 right-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-2">
-                  <Play className="h-4 w-4 text-white" />
-                  <span className="text-white text-sm">View Collection</span>
-                </div>
-                <div className="flex items-center space-x-1">
-                  <Button variant="ghost" size="icon" className="h-8 w-8 text-white hover:bg-white/20">
-                    <Heart className="h-4 w-4" />
-                  </Button>
-                  <Button variant="ghost" size="icon" className="h-8 w-8 text-white hover:bg-white/20">
-                    <Share2 className="h-4 w-4" />
-                  </Button>
-                </div>
+          {/* Type Badge */}
+          <div className="absolute top-3 right-3">
+            <Badge
+              variant="secondary"
+              className={`bg-black/50 backdrop-blur-sm border-none ${typeColors[collection.type]}`}
+            >
+              <TypeIcon className="mr-1 h-3 w-3" />
+              {collection.type}
+            </Badge>
+          </div>
+
+          {/* Privacy Indicator */}
+          {!collection.isPublic && (
+            <div className="absolute top-3 left-3">
+              <Badge variant="secondary" className="bg-black/50 backdrop-blur-sm border-none text-siddu-text-subtle">
+                <Lock className="mr-1 h-3 w-3" />
+                Private
+              </Badge>
+            </div>
+          )}
+        </div>
+
+        <CardContent className="p-4 space-y-3">
+          {/* Title and Description */}
+          <div className="space-y-2">
+            <h3 className="font-semibold text-siddu-text-primary line-clamp-1 group-hover:text-siddu-electric-blue transition-colors">
+              {collection.title}
+            </h3>
+            <p className="text-sm text-siddu-text-secondary line-clamp-2">{collection.description}</p>
+          </div>
+
+          {/* Stats */}
+          <div className="flex items-center justify-between text-sm text-siddu-text-subtle">
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-1">
+                <Film className="h-4 w-4" />
+                <span>{collection.movieCount}</span>
               </div>
+              {collection.followers > 0 && (
+                <div className="flex items-center gap-1">
+                  <Users className="h-4 w-4" />
+                  <span>{collection.followers.toLocaleString()}</span>
+                </div>
+              )}
             </div>
+            {collection.type === "featured" && (
+              <div className="flex items-center gap-1 text-yellow-400">
+                <Star className="h-4 w-4 fill-current" />
+              </div>
+            )}
           </div>
 
-          {/* Collection type badge */}
-          {variant === "featured" && (
-            <div className="absolute top-2 left-2">
-              <Badge className="bg-[#6e4bbd] text-white">Featured</Badge>
+          {/* Creator */}
+          <div className="flex items-center gap-2">
+            <Avatar className="h-6 w-6">
+              <AvatarImage src={collection.creatorAvatar || "/placeholder.svg"} alt={collection.creator} />
+              <AvatarFallback className="text-xs bg-siddu-electric-blue text-siddu-deep-night">
+                {collection.creator.charAt(0)}
+              </AvatarFallback>
+            </Avatar>
+            <span className="text-sm text-siddu-text-subtle">by {collection.creator}</span>
+          </div>
+
+          {/* Tags */}
+          {collection.tags && collection.tags.length > 0 && (
+            <div className="flex flex-wrap gap-1">
+              {collection.tags.slice(0, 3).map((tag) => (
+                <Badge
+                  key={tag}
+                  variant="outline"
+                  className="text-xs border-siddu-electric-blue/30 text-siddu-electric-blue bg-siddu-electric-blue/10"
+                >
+                  {tag}
+                </Badge>
+              ))}
+              {collection.tags.length > 3 && (
+                <Badge variant="outline" className="text-xs border-siddu-text-subtle/30 text-siddu-text-subtle">
+                  +{collection.tags.length - 3}
+                </Badge>
+              )}
             </div>
           )}
-        </div>
-      </Link>
+        </CardContent>
 
-      <div className="p-4">
-        <div className="flex items-start justify-between">
-          <div className="flex-1 min-w-0">
-            <Link href={`/collections/${collection.id}`}>
-              <h3 className="font-semibold text-white line-clamp-1 hover:text-[#6e4bbd] transition-colors">
-                {collection.title}
-              </h3>
-            </Link>
-            <p className="text-sm text-[#A0A0A0] mt-1 line-clamp-2">{collection.description}</p>
-          </div>
-
-          {variant === "user" && onDelete && (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-8 w-8 text-[#A0A0A0] hover:text-white">
-                  <MoreVertical className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="bg-[#2A2A2A] border-[#444444]">
-                <DropdownMenuItem className="text-red-400 hover:text-red-300" onClick={onDelete}>
-                  <Trash2 className="h-4 w-4 mr-2" />
-                  Delete Collection
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          )}
-        </div>
-
-        <div className="flex items-center justify-between mt-3">
-          <div className="flex items-center space-x-4 text-xs text-[#A0A0A0]">
-            <span>{collection.movieCount} movies</span>
-            <div className="flex items-center">
-              <Users className="h-3 w-3 mr-1" />
-              <span>{collection.followers}</span>
-            </div>
-          </div>
-          <div className="text-xs text-[#A0A0A0]">By {collection.creator}</div>
-        </div>
-      </div>
+        {/* Hover Overlay */}
+        <motion.div
+          className="absolute inset-0 bg-gradient-to-t from-siddu-electric-blue/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: isHovered ? 1 : 0 }}
+        />
+      </Card>
     </motion.div>
   )
 }
