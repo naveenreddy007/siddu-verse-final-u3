@@ -1,10 +1,6 @@
 import type { Config } from "tailwindcss"
-import defaultConfig from "shadcn/ui/tailwind.config"
-
 const config = {
-  ...defaultConfig,
   content: [
-    ...defaultConfig.content,
     "./pages/**/*.{ts,tsx}",
     "./components/**/*.{ts,tsx}",
     "./app/**/*.{ts,tsx}",
@@ -12,7 +8,6 @@ const config = {
     "*.{js,ts,jsx,tsx,mdx}",
   ],
   theme: {
-    ...defaultConfig.theme,
     container: {
       center: true,
       padding: "2rem",
@@ -21,9 +16,7 @@ const config = {
       },
     },
     extend: {
-      ...defaultConfig.theme.extend,
       colors: {
-        ...defaultConfig.theme.extend.colors,
         "siddu-deep-night": "#121212",
         "siddu-dark-grey": "#1E1E1E",
         "siddu-light-grey": "#2A2A2A",
@@ -32,13 +25,11 @@ const config = {
         "siddu-text-secondary": "#A0A0A0",
       },
       borderRadius: {
-        ...defaultConfig.theme.extend.borderRadius,
         lg: "0.75rem",
         md: "calc(0.75rem - 2px)",
         sm: "calc(0.75rem - 4px)",
       },
       keyframes: {
-        ...defaultConfig.theme.extend.keyframes,
         "accordion-down": {
           from: { height: "0" },
           to: { height: "var(--radix-accordion-content-height)" },
@@ -57,14 +48,13 @@ const config = {
         },
       },
       animation: {
-        ...defaultConfig.theme.extend.animation,
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
         aurora: "aurora 60s linear infinite",
       },
     },
   },
-  plugins: [...defaultConfig.plugins, require("tailwindcss-animate")],
+  plugins: [require("tailwindcss-animate")],
 } satisfies Config
 
 export default config
