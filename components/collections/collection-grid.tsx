@@ -10,28 +10,40 @@ interface CollectionGridProps {
 }
 
 export function CollectionGrid({ title, collections }: CollectionGridProps) {
-  if (collections.length === 0) return null
+  if (collections.length === 0) {
+    return null
+  }
+
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+      },
+    },
+  }
 
   return (
-    <motion.section
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-      className="space-y-6"
-    >
-      <h2 className="text-2xl font-bold text-siddu-text-primary md:text-3xl">{title}</h2>
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-        {collections.map((collection, index) => (
-          <motion.div
-            key={collection.id}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: index * 0.1 }}
-          >
-            <CollectionCard collection={collection} />
-          </motion.div>
+    <section className="space-y-6">
+      <motion.h2
+        initial={{ opacity: 0, x: -20 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.5 }}
+        className="text-2xl font-bold text-siddu-text-primary"
+      >
+        {title}
+      </motion.h2>
+      <motion.div
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+      >
+        {collections.map((collection) => (
+          <CollectionCard key={collection.id} collection={collection} />
         ))}
-      </div>
-    </motion.section>
+      </motion.div>
+    </section>
   )
 }

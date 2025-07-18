@@ -2,86 +2,71 @@
 
 import { useState } from "react"
 import { motion } from "framer-motion"
-import { Plus, Sparkles } from "lucide-react"
+import { Plus, Film } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { CreateCollectionModal } from "./create-collection-modal"
-import type { Collection, CreateCollectionData } from "./types"
 
 interface CollectionsHeaderProps {
-  onCreateCollection: (collection: Omit<Collection, "id" | "createdAt" | "updatedAt" | "followers">) => void
+  onCreateCollection: (collection: any) => void
 }
 
 export function CollectionsHeader({ onCreateCollection }: CollectionsHeaderProps) {
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
-
-  const handleCreateCollection = (data: CreateCollectionData) => {
-    const newCollection = {
-      ...data,
-      creator: "You",
-      creatorAvatar: "/user-avatar-3.png",
-      movieCount: 0,
-      posterImages: [],
-      type: "user" as const,
-    }
-    onCreateCollection(newCollection)
-    setIsCreateModalOpen(false)
-  }
+  const [showCreateModal, setShowCreateModal] = useState(false)
 
   return (
     <>
-      <motion.header
-        className="relative overflow-hidden bg-gradient-to-br from-siddu-deep-night via-siddu-dark-grey to-siddu-deep-night"
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
-      >
-        {/* Background Pattern */}
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute inset-0 bg-[url('/grid.png')] bg-repeat opacity-20" />
-          <div className="absolute inset-0 bg-gradient-to-t from-siddu-deep-night/80 to-transparent" />
-        </div>
+      <div className="relative py-20 px-4 overflow-hidden bg-siddu-deep-night">
+        <div className="absolute inset-0 animate-aurora [background-image:radial-gradient(ellipse_at_100%_0%,theme(colors.blue.500)_0%,transparent_50%),radial-gradient(ellipse_at_0%_100%,theme(colors.purple.500)_0%,transparent_50%)] opacity-20"></div>
+        <div className="absolute inset-0 bg-[url('/grid.png')] bg-center [mask-image:linear-gradient(180deg,white,rgba(255,255,255,0))]"></div>
 
-        <div className="container relative mx-auto px-4 py-16">
-          <div className="flex flex-col items-center text-center">
+        <div className="container mx-auto relative z-10">
+          <motion.div
+            className="max-w-3xl mx-auto text-center"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, ease: "easeOut" }}
+          >
             <motion.div
-              className="mb-4 flex items-center gap-2"
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
+              initial={{ scale: 0.5, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ duration: 0.5, delay: 0.2, type: "spring", stiffness: 100 }}
+              className="inline-block p-4 mb-4 bg-siddu-dark-grey/50 rounded-full border border-siddu-light-grey"
             >
-              <Sparkles className="h-8 w-8 text-siddu-electric-blue" />
-              <h1 className="text-4xl font-bold text-siddu-text-primary md:text-6xl">Collections</h1>
+              <Film className="h-8 w-8 text-siddu-electric-blue" />
             </motion.div>
+            <h1 className="text-4xl md:text-6xl font-bold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-white to-siddu-text-secondary tracking-tighter">
+              Movie Collections
+            </h1>
+            <p className="text-lg text-siddu-text-secondary mb-8 max-w-2xl mx-auto">
+              Discover, create, and share curated lists of films. From official Siddu selections to community-driven
+              compilations, find your next movie marathon here.
+            </p>
 
-            <motion.p
-              className="mb-8 max-w-2xl text-lg text-siddu-text-secondary md:text-xl"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.4 }}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.4 }}
             >
-              Curate your cinematic journey. Discover handpicked collections from fellow film enthusiasts and create
-              your own personalized movie lists.
-            </motion.p>
-
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }}>
               <Button
-                onClick={() => setIsCreateModalOpen(true)}
-                className="bg-siddu-electric-blue text-siddu-deep-night hover:bg-siddu-electric-blue/90"
+                onClick={() => setShowCreateModal(true)}
                 size="lg"
+                className="bg-siddu-electric-blue hover:bg-siddu-electric-blue/90 text-siddu-deep-night font-bold shadow-lg shadow-siddu-electric-blue/20"
               >
-                <Plus className="mr-2 h-5 w-5" />
-                Create Collection
+                <Plus className="h-5 w-5 mr-2" />
+                Create New Collection
               </Button>
             </motion.div>
-          </div>
+          </motion.div>
         </div>
-      </motion.header>
+      </div>
 
-      <CreateCollectionModal
-        isOpen={isCreateModalOpen}
-        onClose={() => setIsCreateModalOpen(false)}
-        onSubmit={handleCreateCollection}
-      />
+      {showCreateModal && (
+        <CreateCollectionModal
+          isOpen={showCreateModal}
+          onClose={() => setShowCreateModal(false)}
+          onCreateCollection={onCreateCollection}
+        />
+      )}
     </>
   )
 }
