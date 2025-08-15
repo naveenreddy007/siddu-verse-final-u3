@@ -44,7 +44,7 @@ export const metadata: Metadata = {
     title: "Siddu - Movies & Cricket Platform",
     description: "Your ultimate destination for movies and cricket content, reviews, and community discussions.",
   },
-    generator: 'v0.dev'
+    generator: 'v0.app'
 }
 
 export default function RootLayout({
